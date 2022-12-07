@@ -1,0 +1,18 @@
+back/node_modules
+back/build
+
+front/node_modules
+front/dist
+front/dist-ssr
+front/*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
