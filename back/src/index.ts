@@ -1,31 +1,103 @@
-import { Server } from 'socket.io';
-import { v4 as uuidv4 } from 'uuid';
-import util from 'util';
+require('module-alias/register')
+import { Server } from 'socket.io'
+import {
+  TServerToClientEvents,
+  TClientToServerEvents,
+  EEventRoom,
+  EEventMsg,
+  TUser,
+} from '@dto'
 
-const PORT = 3012;
+import User from './user'
+import { createMessage } from './utils'
+import Rooms from './rooms'
 
-const io = new Server({
+const PORT = 3012
+
+const rooms = new Rooms()
+const users = new Map<TUser['id'], TUser>()
+
+const io = new Server<TClientToServerEvents, TServerToClientEvents>({
   cors: {
     origin: 'http://localhost:5173',
   },
-});
-
-console.log(`server is listening on port ${PORT} \n`);
+})
 
 io.on('connection', (socket) => {
-  console.log(util.inspect(socket.client.request.headers, { depth: 5 }));
+  console.log('new connection', socket.id)
 
-  socket.on('roomid-req', () => {
-    const roomid = uuidv4();
-    console.log('roomid:', roomid);
-    socket.emit('roomid', roomid);
-  });
+  users.set(socket.id, new User(socket.id))
 
-  socket.on('room-join-req', (id) => {
-    console.log('user', socket.id, 'requested to join the room', id, '\n');
-    socket.join(id);
-  });
-});
+  socket.on(EEventRoom.create, (ackFn) => {
+    const roomid = rooms.create()
+    ackFn(roomid)
+
+    console.log('new room:', roomid)
+  })
+
+  socket.on(EEventRoom.check, (roomId, ackFn) => {
+    const check = rooms.has(roomId)
+    ackFn(check)
+
+    console.log(EEventRoom.check, roomId, ':', check)
+  })
+
+  socket.on(EEventRoom.join, (roomId) => {
+    console.log('user', socket.id, 'wants to join room', roomId)
+
+    const user = users.get(socket.id)
+
+    if (!user) {
+      return socket.emit(EEventMsg.all, [])
+    }
+
+    rooms.addUser({ user, roomId })
+
+    rooms.getUsers(roomId).forEach((neighbor) => {
+      if (neighbor.id !== user.id) {
+        io.to(neighbor.id).emit(EEventRoom.userJoined, user)
+      }
+    })
+
+    socket.emit(EEventMsg.all, rooms.getAllMessages(roomId))
+  })
+
+  socket.on(EEventRoom.leave, () => {
+    const user = users.get(socket.id)
+    const roomId = user?.roomId
+
+    if (!roomId) return
+
+    rooms.deleteUser({ id: socket.id, roomId })
+
+    if (rooms.has(roomId)) {
+      rooms.getUsers(roomId).forEach((neighbor) => {
+        io.to(neighbor.id).emit(EEventRoom.userLeaved, user)
+      })
+    }
+
+    console.log('user', socket.id, 'leaved room', roomId)
+  })
+
+  socket.on(EEventMsg.sent, (msg) => {
+    const user = users.get(socket.id)
+    const roomId = user?.roomId
+
+    if (!roomId) {
+      return
+    }
+
+    const message = createMessage({ text: msg, user })
+
+    rooms.addMessage({ message, roomId })
+
+    const neighbors = rooms.getUsers(roomId)
+
+    neighbors.forEach((neighbor) => {
+      io.to(neighbor.id).emit(EEventMsg.new, message)
+    })
+  })
+})
 
 /**
  * connect from the root route
@@ -37,4 +109,6 @@ io.on('connection', (socket) => {
  * setup peer connection
  */
 
-io.listen(PORT);
+io.listen(PORT)
+
+console.log(`server is listening on port ${PORT} \n`)

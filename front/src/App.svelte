@@ -1,26 +1,19 @@
 <script lang="ts">
-  import { io } from 'socket.io-client';
-  import { navigate } from "svelte-navigator";
-
-  const socket = io('ws://localhost:3012');
-
-  socket.on('connection', () => {
-    console.log('connected');
-  });
-
-  socket.emit('roomid-request');
-
-  socket.on('roomid', (payload: string) => {
-
-    console.log('roomid', payload);
-    navigate(`/room/${payload}`);
-  });
+  import { Router, Route } from "svelte-navigator"
+	import Main from "./routes/Main.svelte"
+  import Room from "./routes/Room.svelte";
 </script>
 
 <main>
-
+  <Router>
+    <Route path="/">
+			<Main />
+		</Route>
+		<Route path="room/:roomId" let:params>
+      <Room roomId={params.roomId} />
+    </Route>
+  </Router>
 </main>
 
 <style>
-
 </style>
