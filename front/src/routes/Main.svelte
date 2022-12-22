@@ -1,13 +1,13 @@
 <script lang="ts">
   import { navigate } from 'svelte-navigator'
-  import Button from '@smui/button'
-  import Textfield from '@smui/textfield'
+  import { Button, Input, Label } from 'sveltestrap'
   import { EEventRoom } from '@dto'
   import socket from '../utils/ws'
 
   let roomId = ''
+  let invalid = false
 
-  const createMeeting = (evt: CustomEvent<MouseEvent>) => {
+  const createMeeting = (evt: Event) => {
     evt.preventDefault()
     console.log('create room req')
     socket.emit(EEventRoom.create, (id) => {
@@ -22,21 +22,54 @@
     console.log('room:check')
     socket.emit(EEventRoom.check, reqRoomId, (ack) => {
       if (ack) {
+        invalid = false
         console.log('trying to join the room')
         navigate(`/room/${reqRoomId}`)
+      } else {
+        invalid = true
       }
       console.log('room:check', ack)
     })
   }
 
+  const clearInvalid = () => {invalid = false}
 
 </script>
 
-<div>
-  <form action="/" on:submit={joinMeeting}>
-    <Textfield variant="outlined" bind:value={roomId} label="Enter room ID"/>
-    <Button variant="outlined" type="submit" touch>Join room</Button>
+<div class="home">
+  <form action="/" on:submit={joinMeeting} class="mb-2">
+    <Label for="roomId">Enter room ID</Label>
+    <div class="d-flex pb-4 position-relative">
+      <Input
+        bind:value={roomId}
+        on:input={clearInvalid}
+        type="text"
+        name="roomId"
+        placeholder="Room ID"
+        id="roomId"
+        class="me-3"
+        size="lg"/>
+      <Button
+        type="submit"
+        class="d-block text-nowrap"
+        color="dark"
+        size="lg"
+        outline
+      >Join room</Button>
+      { #if invalid }
+        <p class="position-absolute bottom-0 mb-0 text-danger">Room not found</p>
+      { /if }
+    </div>
   </form>
 
-  <Button on:click={createMeeting} color="secondary" variant="raised" type="button" touch>New meeting</Button>
+  <Button on:click={createMeeting} type="button" color="dark" class="d-block" size="lg">New meeting</Button>
 </div>
+
+
+<style>
+  .home {
+    display: grid;
+    place-content: center;
+    min-height: 100vh;
+  }
+</style>

@@ -8,7 +8,7 @@ export function createMessage({
   user,
 }: {
   text: TMessageReq
-  user: TUser
+  user: TUser & { name: string }
 }): TMessageRes {
   return {
     id: getId(),

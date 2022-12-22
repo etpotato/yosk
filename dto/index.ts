@@ -15,8 +15,8 @@ export enum EEventMsg {
 
 export type TUser = {
   id: string
-  name?: string
-  roomId?: string
+  name: string
+  roomId: string
 }
 
 export type TMessageReq = string
@@ -27,7 +27,7 @@ export type TMessageRes = {
   text: string;
   author: {
     id: string;
-    name?: string;
+    name: string;
   };
 };
 
@@ -47,7 +47,7 @@ export type TServerToClientEvents = {
 export type TClientToServerEvents = {
   [EEventRoom.create]: (callback: (roomId: TRoom['id']) => void) => void
   [EEventRoom.check]: (roomId: TRoom['id'], callback: (check: boolean) => void) => void
-  [EEventRoom.join]: (roomId: TRoom['id']) => void
+  [EEventRoom.join]: ({ roomId, name }: {roomId: TRoom['id'], name: TUser['name']}, callback: (user: TUser) => void) => void
   [EEventRoom.leave]: () => void
   [EEventMsg.sent]: (msg: TMessageReq) => void
 }

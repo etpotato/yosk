@@ -39,7 +39,8 @@ class Rooms {
       const room = this.rooms.get(roomId)
 
       if (!room) {
-        throw new Error(`room ${roomId} not found`)
+        console.log(`room ${roomId} not found`)
+        return false
       }
 
       user.roomId = room.id
@@ -53,7 +54,7 @@ class Rooms {
     }
   }
 
-  deleteUser({ id, roomId }: TUser) {
+  deleteUser({ id, roomId }: Omit<TUser, 'name'>) {
     try {
       if (!roomId) {
         throw new Error('roomId is not provided')
@@ -62,7 +63,8 @@ class Rooms {
       const room = this.rooms.get(roomId)
 
       if (!room) {
-        throw new Error(`room ${id} not found`)
+        console.log(`user ${id} not found`)
+        return false
       }
 
       room.users.delete(id)

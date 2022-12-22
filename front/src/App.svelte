@@ -4,7 +4,7 @@
   import Room from "./routes/Room.svelte";
 </script>
 
-<main>
+<main class="container-fluid">
   <Router>
     <Route path="/">
 			<Main />

@@ -9,7 +9,7 @@ import {
 } from '@dto'
 
 import User from './user'
-import { createMessage } from './utils'
+import { createMessage, createName } from './utils'
 import Rooms from './rooms'
 
 const PORT = 3012
@@ -26,8 +26,6 @@ const io = new Server<TClientToServerEvents, TServerToClientEvents>({
 io.on('connection', (socket) => {
   console.log('new connection', socket.id)
 
-  users.set(socket.id, new User(socket.id))
-
   socket.on(EEventRoom.create, (ackFn) => {
     const roomid = rooms.create()
     ackFn(roomid)
@@ -42,24 +40,27 @@ io.on('connection', (socket) => {
     console.log(EEventRoom.check, roomId, ':', check)
   })
 
-  socket.on(EEventRoom.join, (roomId) => {
+  socket.on(EEventRoom.join, ({ roomId, name }, ackFn) => {
     console.log('user', socket.id, 'wants to join room', roomId)
 
-    const user = users.get(socket.id)
+    const user = new User({
+      id: socket.id,
+      name: name || createName(),
+      roomId,
+    })
 
-    if (!user) {
-      return socket.emit(EEventMsg.all, [])
-    }
+    users.set(user.id, user)
 
     rooms.addUser({ user, roomId })
+
+    ackFn(user)
+    socket.emit(EEventMsg.all, rooms.getAllMessages(roomId))
 
     rooms.getUsers(roomId).forEach((neighbor) => {
       if (neighbor.id !== user.id) {
         io.to(neighbor.id).emit(EEventRoom.userJoined, user)
       }
     })
-
-    socket.emit(EEventMsg.all, rooms.getAllMessages(roomId))
   })
 
   socket.on(EEventRoom.leave, () => {
@@ -96,6 +97,16 @@ io.on('connection', (socket) => {
     neighbors.forEach((neighbor) => {
       io.to(neighbor.id).emit(EEventMsg.new, message)
     })
+  })
+
+  socket.on('disconnect', () => {
+    const user = users.get(socket.id)
+
+    if (!user) return
+
+    rooms.deleteUser(user)
+    users.delete(user.id)
+    console.log('user', user.id, `"${user.name}"`, 'disconnected')
   })
 })
 
