@@ -5,7 +5,7 @@
 
   import { EEventRoom } from '@dto'
   import type { TRoom } from '@dto'
-  import socket from '../utils/ws'
+  import socket from '../lib/ws'
   import { user } from '../store/user';
   import Chat from '../lib/Chat.svelte'
 

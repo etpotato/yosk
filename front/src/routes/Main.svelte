@@ -2,7 +2,7 @@
   import { navigate } from 'svelte-navigator'
   import { Button, Input, Label } from 'sveltestrap'
   import { EEventRoom } from '@dto'
-  import socket from '../utils/ws'
+  import socket from '../lib/ws'
 
   let roomId = ''
   let invalid = false

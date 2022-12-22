@@ -1,11 +1,11 @@
 <script lang="ts">
   import { tick } from 'svelte'
+  import Autolinker from 'autolinker'
   import { EEventMsg, type TUser } from '@dto'
 
   import type { TMessageReq, TMessageRes } from '@dto'
-  import socket from '../utils/ws'
+  import socket from './ws'
   import formatTime from '../utils/formatTime'
-  import getInitials from '../utils/getInitials'
   import { user } from '../store/user'
 
   let input: TMessageReq  = ''
@@ -29,9 +29,17 @@
     }
   }
 
+  const formatText = (msg: TMessageRes) => ({ 
+    ...msg, 
+    text: Autolinker.link(
+      msg.text, 
+      { className: 'text-link'}
+      )
+    })
+
   socket.on(EEventMsg.all, async (allMsg) => {
     console.log(EEventMsg.all, allMsg)
-    messages = [...allMsg, ...messages]
+    messages = allMsg.map(formatText)
 
     await tick()
     console.log(chatList)
@@ -40,7 +48,7 @@
 
   socket.on(EEventMsg.new, async (msg) => {
     console.log(EEventMsg.new, msg)
-    messages = [...messages, msg]
+    messages = [...messages, formatText(msg)]
 
     await tick()
     chatList?.scrollTo(0, chatList.scrollHeight)
@@ -48,12 +56,12 @@
 </script>
 
 <div class="d-flex flex-column vh-100 py-2">
-  <ul class="chat-list flex-grow-1 mb-1 bg-secondary bg-opacity-10 rounded p-2" bind:this={chatList}>
+  <ul class="chat-list flex-grow-1 mb-1 bg-primary bg-opacity-10 rounded p-2" bind:this={chatList}>
     {#each messages as message (message.id)}
       <li class="chat-message">
         <div class="chat-left">
           {#if $user?.id !== message.author.id}
-            <div class="chat-avatar bg-body rounded">
+            <div class="chat-avatar bg-body rounded border border-1">
               <img
                 src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
                 alt={message.author.name}
@@ -66,11 +74,11 @@
         </div>
         <div class="chat-right rounded small {
           $user?.id !== message.author.id
-            ? 'bg-body'
+            ? 'bg-body border border-1'
             : 'bg-dark text-bg-dark'}"
         >
           <p class="fw-bold mb-1">{message.author.name}</p>
-          <p class="chat-text">{message.text}</p>
+          <p class="chat-text">{@html message.text}</p>
           <p class="chat-time">{formatTime(new Date(message.timestamp * 1000))}</p>
         </div>
       </li>
