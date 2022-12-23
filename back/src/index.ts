@@ -9,7 +9,7 @@ import {
 } from '@dto'
 
 import User from './user'
-import { createMessage, createName } from './utils'
+import { createUserMessage, createInfoMessage, createName } from './utils'
 import Rooms from './rooms'
 
 const PORT = 3012
@@ -50,14 +50,17 @@ io.on('connection', (socket) => {
     })
 
     users.set(user.id, user)
-
     rooms.addUser({ user, roomId })
-
     ackFn(user)
-    socket.emit(EEventMsg.all, rooms.getAllMessages(roomId))
 
-    rooms.getUsers(roomId).forEach((neighbor) => {
+    const message = createInfoMessage({ user, action: EEventRoom.userJoined })
+    rooms.addMessage({ message, roomId })
+    socket.emit(EEventMsg.all, rooms.getAllMessages(roomId))
+    
+    const neighbors = rooms.getUsers(roomId)
+    neighbors.forEach((neighbor) => {
       if (neighbor.id !== user.id) {
+        io.to(neighbor.id).emit(EEventMsg.new, message)
         io.to(neighbor.id).emit(EEventRoom.userJoined, user)
       }
     })
@@ -69,15 +72,18 @@ io.on('connection', (socket) => {
 
     if (!roomId) return
 
+    const message = createInfoMessage({ user, action: EEventRoom.userLeaved })
+    rooms.addMessage({ message, roomId })
     rooms.deleteUser({ id: socket.id, roomId })
 
     if (rooms.has(roomId)) {
       rooms.getUsers(roomId).forEach((neighbor) => {
+        io.to(neighbor.id).emit(EEventMsg.new, message)
         io.to(neighbor.id).emit(EEventRoom.userLeaved, user)
       })
     }
 
-    console.log('user', socket.id, 'leaved room', roomId)
+    console.log('user', user.id, `"${user.name}"`, 'leaved room', roomId)
   })
 
   socket.on(EEventMsg.sent, (msg) => {
@@ -88,7 +94,7 @@ io.on('connection', (socket) => {
       return
     }
 
-    const message = createMessage({ text: msg, user })
+    const message = createUserMessage({ text: msg, user })
 
     rooms.addMessage({ message, roomId })
 
@@ -101,10 +107,22 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     const user = users.get(socket.id)
+    const roomId = user?.roomId
 
-    if (!user) return
+    if (!user || !roomId) return
 
     rooms.deleteUser(user)
+
+    if (rooms.has(roomId)) {
+      const message = createInfoMessage({ user, action: EEventRoom.userLeaved })
+      rooms.addMessage({ message, roomId })
+
+      rooms.getUsers(roomId).forEach((neighbor) => {
+        io.to(neighbor.id).emit(EEventMsg.new, message)
+        io.to(neighbor.id).emit(EEventRoom.userLeaved, user)
+      })
+    }
+
     users.delete(user.id)
     console.log('user', user.id, `"${user.name}"`, 'disconnected')
   })

@@ -13,6 +13,11 @@ export enum EEventMsg {
   all = 'msg:all',
 }
 
+export enum EMsgType {
+  user ='user',
+  info = 'info'
+}
+
 export type TUser = {
   id: string
   name: string
@@ -21,7 +26,8 @@ export type TUser = {
 
 export type TMessageReq = string
 
-export type TMessageRes = {
+export type TUserMessageRes = {
+  type: EMsgType.user
   id: string;
   timestamp: number;
   text: string;
@@ -29,7 +35,17 @@ export type TMessageRes = {
     id: string;
     name: string;
   };
+}
+
+export type TInfoMessageRes = {
+  type: EMsgType.info,
+  id: string;
+  timestamp: number;
+  action: EEventRoom.userJoined | EEventRoom.userLeaved,
+  user: TUser
 };
+
+export type TMessageRes = TUserMessageRes | TInfoMessageRes
 
 export type TRoom = {
   id: string

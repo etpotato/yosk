@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { tick } from 'svelte'
+  import { onDestroy, onMount, tick } from 'svelte'
   import Autolinker from 'autolinker'
-  import { EEventMsg, type TUser } from '@dto'
+  import { EEventMsg, EEventRoom, EMsgType } from '@dto'
 
   import type { TMessageReq, TMessageRes } from '@dto'
   import socket from './ws'
@@ -29,29 +29,42 @@
     }
   }
 
-  const formatText = (msg: TMessageRes) => ({ 
-    ...msg, 
-    text: Autolinker.link(
-      msg.text, 
-      { className: 'text-link'}
-      )
+  function formatText(msg: TMessageRes) {
+    return msg.type === EMsgType.user
+      ? ({ 
+      ...msg, 
+      text: Autolinker.link(
+        msg.text, 
+        { className: 'text-link'}
+        )
+      })
+      : msg
+  }
+
+
+
+  onMount(() => {
+    socket.on(EEventMsg.all, async (allMsg) => {
+      console.log(EEventMsg.all, allMsg)
+      messages = allMsg.map(formatText)
+
+      await tick()
+      console.log(chatList)
+      chatList?.scrollTo(0, chatList.scrollHeight)
     })
 
-  socket.on(EEventMsg.all, async (allMsg) => {
-    console.log(EEventMsg.all, allMsg)
-    messages = allMsg.map(formatText)
+    socket.on(EEventMsg.new, async (msg) => {
+      console.log(EEventMsg.new, msg)
+      messages = [...messages, formatText(msg)]
 
-    await tick()
-    console.log(chatList)
-    chatList?.scrollTo(0, chatList.scrollHeight)
+      await tick()
+      chatList?.scrollTo(0, chatList.scrollHeight)
+    })
   })
 
-  socket.on(EEventMsg.new, async (msg) => {
-    console.log(EEventMsg.new, msg)
-    messages = [...messages, formatText(msg)]
-
-    await tick()
-    chatList?.scrollTo(0, chatList.scrollHeight)
+  onDestroy(() => {
+    socket.removeAllListeners(EEventMsg.all)
+    socket.removeAllListeners(EEventMsg.new)
   })
 </script>
 
@@ -59,28 +72,35 @@
   <ul class="chat-list flex-grow-1 mb-1 bg-primary bg-opacity-10 rounded p-2" bind:this={chatList}>
     {#each messages as message (message.id)}
       <li class="chat-message">
-        <div class="chat-left">
-          {#if $user?.id !== message.author.id}
-            <div class="chat-avatar bg-body rounded border border-1">
-              <img
-                src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
-                alt={message.author.name}
-                width="36"
-                height="36"
-              >
-              <!-- {getInitials(message.author.name)} -->
+        {#if message.type === EMsgType.info}
+            <div></div>
+            <div class="chat-info text-bg-dark bg-opacity-25">
+              <b>{message.user.name}</b> {message.action === EEventRoom.userJoined ? 'joined' : 'leaved'} the chat
             </div>
-          {/if}
-        </div>
-        <div class="chat-right rounded small {
-          $user?.id !== message.author.id
-            ? 'bg-body border border-1'
-            : 'bg-dark text-bg-dark'}"
-        >
-          <p class="fw-bold mb-1">{message.author.name}</p>
-          <p class="chat-text">{@html message.text}</p>
-          <p class="chat-time">{formatTime(new Date(message.timestamp * 1000))}</p>
-        </div>
+        {:else}
+          <div class="chat-left">
+            {#if $user?.id !== message.author.id}
+              <div class="chat-avatar bg-body rounded border border-1">
+                <img
+                  src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
+                  alt={message.author.name}
+                  width="36"
+                  height="36"
+                >
+                <!-- {getInitials(message.author.name)} -->
+              </div>
+            {/if}
+          </div>
+          <div class="chat-right rounded small {
+            $user?.id !== message.author.id
+              ? 'bg-body border border-1'
+              : 'bg-dark text-bg-dark'}"
+          >
+            <p class="fw-bold mb-1">{message.author.name}</p>
+            <p class="chat-text">{@html message.text}</p>
+            <p class="chat-time">{formatTime(new Date(message.timestamp * 1000))}</p>
+          </div>
+        {/if}
       </li>
     {/each}
   </ul>
@@ -94,11 +114,12 @@
   .chat-list {
     display: grid;
     grid-template-columns: 36px 1fr;
-    grid-gap: 0.3em;
+    grid-gap: 0.25em;
     align-content: start;
     margin: 0;
     padding: 0;
     width: 320px;
+    min-width: 25vw;
     list-style: none;
     overflow: auto;
   }
@@ -114,6 +135,16 @@
 
   .chat-message {
     display: contents;
+  }
+
+  .chat-info {
+    max-width: max-content;
+    margin: 0 auto;
+    padding: 0.2em 1.2em;
+    border-radius: 100em;
+    font-size: 0.7em;
+    line-height: 1;
+    text-align: center;
   }
 
   .chat-left {
