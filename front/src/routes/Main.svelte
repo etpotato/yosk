@@ -1,3 +1,11 @@
+<style>
+  .home {
+    display: grid;
+    place-content: center;
+    min-height: 100vh;
+  }
+</style>
+
 <script lang="ts">
   import { navigate } from 'svelte-navigator'
   import { Button, Input, Label } from 'sveltestrap'
@@ -25,8 +33,9 @@
     })
   }
 
-  const clearInvalid = () => {invalid = false}
-
+  const clearInvalid = () => {
+    invalid = false
+  }
 </script>
 
 <div class="home">
@@ -41,28 +50,28 @@
         placeholder="Room ID"
         id="roomId"
         class="me-3"
-        size="lg"/>
+        size="lg"
+      />
       <Button
         type="submit"
         class="d-block text-nowrap"
         color="dark"
         size="lg"
-        outline
-      >Join room</Button>
-      { #if invalid }
-        <p class="position-absolute bottom-0 mb-0 text-danger">Room not found</p>
-      { /if }
+        outline>Join room</Button
+      >
+      {#if invalid}
+        <p class="position-absolute bottom-0 mb-0 text-danger">
+          Room not found
+        </p>
+      {/if}
     </div>
   </form>
 
-  <Button on:click={createMeeting} type="button" color="dark" class="d-block" size="lg">New meeting</Button>
+  <Button
+    on:click={createMeeting}
+    type="button"
+    color="dark"
+    class="d-block"
+    size="lg">New meeting</Button
+  >
 </div>
-
-
-<style>
-  .home {
-    display: grid;
-    place-content: center;
-    min-height: 100vh;
-  }
-</style>
