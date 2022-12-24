@@ -41,22 +41,15 @@
       : msg
   }
 
-
-
   onMount(() => {
     socket.on(EEventMsg.all, async (allMsg) => {
-      console.log(EEventMsg.all, allMsg)
       messages = allMsg.map(formatText)
-
       await tick()
-      console.log(chatList)
       chatList?.scrollTo(0, chatList.scrollHeight)
     })
 
     socket.on(EEventMsg.new, async (msg) => {
-      console.log(EEventMsg.new, msg)
       messages = [...messages, formatText(msg)]
-
       await tick()
       chatList?.scrollTo(0, chatList.scrollHeight)
     })
@@ -79,17 +72,14 @@
             </div>
         {:else}
           <div class="chat-left">
-            {#if $user?.id !== message.author.id}
-              <div class="chat-avatar bg-body rounded border border-1">
-                <img
-                  src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
-                  alt={message.author.name}
-                  width="36"
-                  height="36"
-                >
-                <!-- {getInitials(message.author.name)} -->
-              </div>
-            {/if}
+            <div class="chat-avatar bg-body rounded border border-1">
+              <img
+                src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
+                alt={message.author.name}
+                width="36"
+                height="36"
+              >
+            </div>
           </div>
           <div class="chat-right rounded small {
             $user?.id !== message.author.id

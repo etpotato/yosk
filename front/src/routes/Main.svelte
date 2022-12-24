@@ -9,26 +9,19 @@
 
   const createMeeting = (evt: Event) => {
     evt.preventDefault()
-    console.log('create room req')
-    socket.emit(EEventRoom.create, (id) => {
-      console.log('trying to join the room')
-      navigate(`/room/${id}`)
-    })
+    socket.emit(EEventRoom.create, (id) => navigate(`/room/${id}`))
   }
 
   const joinMeeting = (evt: Event) => {
     evt.preventDefault()
     const reqRoomId = roomId.trim()
-    console.log('room:check')
     socket.emit(EEventRoom.check, reqRoomId, (ack) => {
       if (ack) {
         invalid = false
-        console.log('trying to join the room')
         navigate(`/room/${reqRoomId}`)
       } else {
         invalid = true
       }
-      console.log('room:check', ack)
     })
   }
 

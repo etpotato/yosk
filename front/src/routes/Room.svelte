@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { fade, scale } from 'svelte/transition'
+  import { scale } from 'svelte/transition'
   import { Link, navigate } from 'svelte-navigator'
   import { Button, Input, Label, Modal, ModalBody, Toast, ToastBody } from 'sveltestrap'
+  import { Peer} from 'peerjs';
+  import type { DataConnection } from 'peerjs';
 
   import { EEventRoom, type TUser } from '@dto'
   import type { TRoom } from '@dto'
@@ -18,12 +20,13 @@
   let name: string = ''
   let toasts: TToast[] = []
   let toastTimeouts: NodeJS.Timeout[] = []
+  let myPeer: Peer
+  let peerCons: DataConnection[] = []
+  let videoStreams: MediaStream[] = []
 
   function checkRoom(id: TRoom['id']) {
-    console.log('room:check')
     socket.emit(EEventRoom.check, id, (ack) => {
       roomExist = ack
-      console.log(`room:check - ${ack}`)
     })
   }
 
@@ -31,21 +34,34 @@
     evt.preventDefault()
     socket.emit(EEventRoom.join, { roomId, name }, (userInfo) => {
       user.set(userInfo)
-    });
+      myPeer = new Peer(userInfo.id)
+      myPeer.on("connection", (conn) => {
+        peerCons.push(conn)
+        conn.on("data", (data) => console.log(data))
+        conn.on("open", () => conn.send("hello!"))
+      })
+      myPeer.on('call', async (call) => {
+        const stream = await getUserMedia()
+        if (!stream) return
+        call.answer(stream)
+        call.on('stream', showVideo)
+      })
+    })
     modalOpen = false
   }
 
-  function addToast(newToast: TToast) {
-    toasts = [...toasts, newToast]
-    const timeout = setTimeout(() => {
-      toasts = toasts.filter((toast) => toast !== newToast)
-      toastTimeouts.filter((to) => to !== timeout)
-    }, 5000)
-    toastTimeouts.push(timeout)
-  }
-
-  socket.on((EEventRoom.userJoined), (user) => {
+  socket.on((EEventRoom.userJoined), async (user) => {
     addToast({type: EEventRoom.userJoined, user})
+    // setup peer connection
+    const conn = myPeer.connect(user.id)
+    peerCons.push(conn)
+    conn.on('open', () => conn.send('hi from existing neighbor'))
+    conn.on('data', (data) => console.log(data))
+    // setup media stream
+    const stream = await getUserMedia()
+    if (!stream) return 
+    const call = myPeer.call(user.id, stream)
+    call.on('stream', showVideo)
   })
 
   socket.on((EEventRoom.userLeaved), (user) => {
@@ -60,8 +76,32 @@
     socket.emit(EEventRoom.leave)
     socket.removeAllListeners(EEventRoom.userJoined)
     socket.removeAllListeners(EEventRoom.userLeaved)
+    peerCons.forEach((conn) => conn.close())
     toastTimeouts.forEach((timeout) => clearTimeout(timeout))
   })
+
+  function showVideo(stream: MediaStream) {
+    videoStreams.push(stream)
+  }
+
+  async function getUserMedia() {
+    let stream = null;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({audio: true,video: true})
+    } catch (err) {
+      console.log('getUserMedia error', err)
+    }
+    return stream
+  }
+
+  function addToast(newToast: TToast) {
+    toasts = [...toasts, newToast]
+    const timeout = setTimeout(() => {
+      toasts = toasts.filter((toast) => toast !== newToast)
+      toastTimeouts.filter((to) => to !== timeout)
+    }, 5000)
+    toastTimeouts.push(timeout)
+  }
 </script>
 
 {#if roomExist}
@@ -70,6 +110,12 @@
       <Button on:click={() => navigate('/')} outline class="mb-3" color="dark">Home</Button>
       <div>
         Room id: {roomId}, user: {$user?.name ? $user?.name : ''}
+        <div class="video-grid">
+          {#each videoStreams as videoStream }
+            <!-- svelte-ignore a11y-media-has-caption -->
+            <video src={URL.createObjectURL(videoStream)}/>
+          {/each}
+        </div>
       </div>
     </div>
     <div class="room-chat">
@@ -125,6 +171,11 @@
 
   .room-video {
     flex: 1 0 auto;
+  }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: 1fr, 1fr;
   }
 
   .noroom {
