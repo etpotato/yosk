@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
     const message = createInfoMessage({ user, action: EEventRoom.userJoined })
     rooms.addMessage({ message, roomId })
     socket.emit(EEventMsg.all, rooms.getAllMessages(roomId))
-    
+
     const neighbors = rooms.getUsers(roomId)
     neighbors.forEach((neighbor) => {
       if (neighbor.id !== user.id) {

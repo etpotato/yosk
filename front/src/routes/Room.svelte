@@ -61,11 +61,11 @@
   }
 
   export let roomId: TRoom['id']
-  let roomExist: boolean = true
-  let modalOpen: boolean = true
-  let name: string = ''
+  let roomExist = true
+  let modalOpen = true
+  let name = ''
   let toasts: TToast[] = []
-  let toastTimeouts: NodeJS.Timeout[] = []
+  let toastTimeouts: ReturnType<typeof setTimeout>[] = []
   let myPeer: Peer
   let peerCons: DataConnection[] = []
   let videoStreams: MediaStream[] = []
@@ -164,7 +164,7 @@
         <div class="video-grid">
           {#each videoStreams as videoStream}
             <!-- svelte-ignore a11y-media-has-caption -->
-            <video src={URL.createObjectURL(videoStream)} />
+            <!-- <video src={URL.createObjectURL(videoStream)} /> -->
           {/each}
         </div>
       </div>

@@ -1,6 +1,7 @@
+// eslint-disable-next-line no-undef
 module.exports = {
   env: {
-    node: true,
+    browser: true,
   },
   parser: '@typescript-eslint/parser',
   plugins: ['svelte3', '@typescript-eslint', 'prettier'],
@@ -19,6 +20,7 @@ module.exports = {
   ],
   rules: {},
   settings: {
+    // eslint-disable-next-line no-undef
     'svelte3/typescript': () => require('typescript'),
   },
 }

@@ -1,4 +1,10 @@
-import { TUser, TMessageReq, TMessageRes, TUserMessageRes, EMsgType, TInfoMessageRes } from '@dto'
+import {
+  TUser,
+  TMessageReq,
+  TUserMessageRes,
+  EMsgType,
+  TInfoMessageRes,
+} from '@dto'
 
 let count = 0
 const getId = () => (count++ % 1000000).toString()

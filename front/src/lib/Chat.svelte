@@ -89,7 +89,7 @@
 
   let input: TMessageReq = ''
   let messages: TMessageRes[] = []
-  let chatList: HTMLUListElement
+  let chatList: HTMLElement
 
   const sendMessage = (evt?: Event) => {
     evt?.preventDefault()
@@ -102,7 +102,7 @@
     input = ''
   }
 
-  const handleEnter = (evt: KeyboardEvent) => {
+  const handleEnter = (evt: Event) => {
     if (evt.key === 'Enter') {
       sendMessage(evt)
     }
