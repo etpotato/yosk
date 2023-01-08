@@ -1,17 +1,9 @@
 <style>
   .room {
     min-height: 100vh;
-    display: flex;
-    gap: 1em;
-  }
-
-  .room-video {
-    flex: 1 0 auto;
-  }
-
-  .video-grid {
     display: grid;
-    grid-template-columns: 1fr, 1fr;
+    grid-gap: 8px;
+    grid-template-columns: 1fr auto;
   }
 
   .noroom {
@@ -37,27 +29,18 @@
   import { onMount, onDestroy } from 'svelte'
   import { scale } from 'svelte/transition'
   import { Link, navigate } from 'svelte-navigator'
-  import {
-    Button,
-    Input,
-    Label,
-    Modal,
-    ModalBody,
-    Toast,
-    ToastBody,
-  } from 'sveltestrap'
-  import { Peer } from 'peerjs'
-  import type { DataConnection } from 'peerjs'
+  import { Button, Input, Label, Modal, ModalBody, Toast, ToastBody } from 'sveltestrap'
 
   import { EEventRoom, type TUser } from '@dto'
   import type { TRoom } from '@dto'
   import socket from '../lib/ws'
   import { user } from '../store/user'
   import Chat from '../lib/Chat.svelte'
+  import VideoChat from '../lib/VideoChat.svelte'
 
   type TToast = {
     type: EEventRoom.userLeaved | EEventRoom.userJoined
-    user: TUser
+    mate: TUser
   }
 
   export let roomId: TRoom['id']
@@ -66,9 +49,6 @@
   let name = ''
   let toasts: TToast[] = []
   let toastTimeouts: ReturnType<typeof setTimeout>[] = []
-  let myPeer: Peer
-  let peerCons: DataConnection[] = []
-  let videoStreams: MediaStream[] = []
 
   function checkRoom(id: TRoom['id']) {
     socket.emit(EEventRoom.check, id, (ack) => {
@@ -80,67 +60,30 @@
     evt.preventDefault()
     socket.emit(EEventRoom.join, { roomId, name }, (userInfo) => {
       user.set(userInfo)
-      myPeer = new Peer(userInfo.id)
-      myPeer.on('connection', (conn) => {
-        peerCons.push(conn)
-        conn.on('data', (data) => console.log(data))
-        conn.on('open', () => conn.send('hello!'))
-      })
-      myPeer.on('call', async (call) => {
-        const stream = await getUserMedia()
-        if (!stream) return
-        call.answer(stream)
-        call.on('stream', showVideo)
-      })
     })
     modalOpen = false
   }
 
-  socket.on(EEventRoom.userJoined, async (user) => {
-    addToast({ type: EEventRoom.userJoined, user })
-    // setup peer connection
-    const conn = myPeer.connect(user.id)
-    peerCons.push(conn)
-    conn.on('open', () => conn.send('hi from existing neighbor'))
-    conn.on('data', (data) => console.log(data))
-    // setup media stream
-    const stream = await getUserMedia()
-    if (!stream) return
-    const call = myPeer.call(user.id, stream)
-    call.on('stream', showVideo)
-  })
-
-  socket.on(EEventRoom.userLeaved, (user) => {
-    addToast({ type: EEventRoom.userLeaved, user })
-  })
-
   onMount(() => {
     checkRoom(roomId)
+    socket.on(EEventRoom.userJoined, handleMateJoined)
+    socket.on(EEventRoom.userLeaved, handleMateLeaved)
   })
 
   onDestroy(() => {
     socket.emit(EEventRoom.leave)
-    socket.removeAllListeners(EEventRoom.userJoined)
-    socket.removeAllListeners(EEventRoom.userLeaved)
-    peerCons.forEach((conn) => conn.close())
+    socket.off(EEventRoom.userJoined, handleMateJoined)
+    socket.off(EEventRoom.userLeaved, handleMateLeaved)
     toastTimeouts.forEach((timeout) => clearTimeout(timeout))
+    user.set(null)
   })
 
-  function showVideo(stream: MediaStream) {
-    videoStreams.push(stream)
+  function handleMateJoined(mate: TUser) {
+    addToast({ type: EEventRoom.userJoined, mate })
   }
 
-  async function getUserMedia() {
-    let stream = null
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      })
-    } catch (err) {
-      console.log('getUserMedia error', err)
-    }
-    return stream
+  function handleMateLeaved(mate: TUser) {
+    addToast({ type: EEventRoom.userLeaved, mate })
   }
 
   function addToast(newToast: TToast) {
@@ -156,17 +99,10 @@
 {#if roomExist}
   <div class="room">
     <div class="room-video">
-      <Button on:click={() => navigate('/')} outline class="mb-3" color="dark"
-        >Home</Button
-      >
+      <VideoChat />
+      <Button on:click={() => navigate('/')} outline class="mb-3" color="dark">Home</Button>
       <div>
         Room id: {roomId}, user: {$user?.name ? $user?.name : ''}
-        <div class="video-grid">
-          {#each videoStreams as videoStream}
-            <!-- svelte-ignore a11y-media-has-caption -->
-            <!-- <video src={URL.createObjectURL(videoStream)} /> -->
-          {/each}
-        </div>
       </div>
     </div>
     <div class="room-chat">
@@ -184,28 +120,22 @@
             id="name"
             placeholder="Name"
             class="mb-3"
-            size="lg"
+            bsSize="lg"
           />
-          <Button
-            color="dark"
-            outline
-            type="submit"
-            class="d-block w-100"
-            size="lg">Yes</Button
-          >
+          <Button color="dark" outline type="submit" class="d-block w-100" size="lg">Yes</Button>
         </form>
       </ModalBody>
     </Modal>
   </div>
   <div class="toast-list">
-    {#each toasts as toast (toast.user.id)}
+    {#each toasts as toast (toast.mate.id)}
       <div transition:scale={{ opacity: 0, start: 0.7 }} class="toast-wrap">
         <Toast>
           <ToastBody>
             {#if toast.type === EEventRoom.userJoined}
-              Say hi to <b>{toast.user.name}</b> 👋
+              Say hi to <b>{toast.mate.name}</b> 👋
             {:else}
-              Bye <b>{toast.user.name}</b> 🤙
+              Bye <b>{toast.mate.name}</b> 🤙
             {/if}
           </ToastBody>
         </Toast>

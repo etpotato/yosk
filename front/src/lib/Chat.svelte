@@ -94,15 +94,12 @@
   const sendMessage = (evt?: Event) => {
     evt?.preventDefault()
     const msg = input.trim()
-
     if (!msg) return
-
     socket.emit(EEventMsg.sent, msg)
-
     input = ''
   }
 
-  const handleEnter = (evt: Event) => {
+  const handleEnter = (evt: KeyboardEvent) => {
     if (evt.key === 'Enter') {
       sendMessage(evt)
     }
@@ -138,25 +135,20 @@
 </script>
 
 <div class="d-flex flex-column vh-100 py-2">
-  <ul
-    class="chat-list flex-grow-1 mb-1 bg-primary bg-opacity-10 rounded p-2"
-    bind:this={chatList}
-  >
+  <ul class="chat-list flex-grow-1 mb-1 bg-primary bg-opacity-10 rounded p-2" bind:this={chatList}>
     {#each messages as message (message.id)}
       <li class="chat-message">
         {#if message.type === EMsgType.info}
           <div />
           <div class="chat-info text-bg-dark bg-opacity-25">
             <b>{message.user.name}</b>
-            {message.action === EEventRoom.userJoined ? 'joined' : 'leaved'} the
-            chat
+            {message.action === EEventRoom.userJoined ? 'joined' : 'leaved'} the chat
           </div>
         {:else}
           <div class="chat-left">
             <div class="chat-avatar bg-body rounded border border-1">
               <img
-                src="https://avatars.dicebear.com/api/croodles-neutral/{message
-                  .author.id}.svg"
+                src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
                 alt={message.author.name}
                 width="36"
                 height="36"

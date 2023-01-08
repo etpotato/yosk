@@ -50,28 +50,18 @@
         placeholder="Room ID"
         id="roomId"
         class="me-3"
-        size="lg"
+        bsSize="lg"
       />
-      <Button
-        type="submit"
-        class="d-block text-nowrap"
-        color="dark"
-        size="lg"
-        outline>Join room</Button
+      <Button type="submit" class="d-block text-nowrap" color="dark" size="lg" outline
+        >Join room</Button
       >
       {#if invalid}
-        <p class="position-absolute bottom-0 mb-0 text-danger">
-          Room not found
-        </p>
+        <p class="position-absolute bottom-0 mb-0 text-danger">Room not found</p>
       {/if}
     </div>
   </form>
 
-  <Button
-    on:click={createMeeting}
-    type="button"
-    color="dark"
-    class="d-block"
-    size="lg">New meeting</Button
+  <Button on:click={createMeeting} type="button" color="dark" class="d-block" size="lg"
+    >New meeting</Button
   >
 </div>
