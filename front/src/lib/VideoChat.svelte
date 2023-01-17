@@ -9,10 +9,34 @@
   }
 
   .grid-item {
+    position: relative;
     display: grid;
     place-content: center;
     aspect-ratio: 4/3;
     overflow: hidden;
+  }
+
+  .controls {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    opacity: 0.8;
+  }
+
+  @media (hover: hover) {
+    .controls {
+      opacity: 0.2;
+      transition: 0.3s opacity;
+    }
+
+    .grid-item:hover .controls,
+    .grid-item:focus-within .controls {
+      opacity: 0.8;
+    }
   }
 
   @media (min-width: 1280px) {
@@ -32,12 +56,18 @@
   import { user } from '../store/user'
   import socket from './ws'
   import Video from './Video.svelte'
+  import Mic from './Mic.svelte'
+  import Cam from './Cam.svelte'
+
+  type MateVideo = { mate: TUser; stream: MediaStream }
 
   let myPeer: Peer | null = null
   let peerCons: DataConnection[] = []
   let modalOpen = false
   let myVideo: MediaStream | null = null
-  let matesVideo: { mate: TUser; stream: MediaStream }[] = []
+  let micActive = true
+  let camActive = true
+  let matesVideo: MateVideo[] = []
   let userUnsuscribe: Unsubscriber
 
   onMount(async () => {
@@ -76,7 +106,7 @@
     myPeer.on('call', async (call) => {
       const stream = myVideo
       if (!stream) return
-      const mate = call.metadata.user
+      const mate = call.metadata.user as TUser
       call.answer(stream)
       call.once('stream', (stream) => {
         showVideo({ mate, stream })
@@ -116,10 +146,18 @@
       console.log('getUserMedia error', err)
       modalOpen = true
     }
+
+    stream?.getAudioTracks().forEach((track) => {
+      track.enabled = micActive
+    })
+    stream?.getVideoTracks().forEach((track) => {
+      track.enabled = camActive
+    })
+
     return stream
   }
 
-  function showVideo({ mate, stream }: { mate: TUser; stream: MediaStream }) {
+  function showVideo({ mate, stream }: MateVideo) {
     matesVideo = [...matesVideo, { mate, stream }]
   }
 
@@ -127,12 +165,36 @@
     evt.preventDefault()
     modalOpen = false
   }
+
+  function handleMic(evt: Event) {
+    evt.preventDefault()
+    ;(evt.currentTarget as HTMLButtonElement)?.blur()
+
+    micActive = !micActive
+    myVideo?.getAudioTracks().forEach((track) => {
+      track.enabled = micActive
+    })
+  }
+
+  function handleCam(evt: Event) {
+    evt.preventDefault()
+    ;(evt.currentTarget as HTMLButtonElement)?.blur()
+
+    camActive = !camActive
+    myVideo?.getVideoTracks().forEach((track) => {
+      track.enabled = camActive
+    })
+  }
 </script>
 
 <ul class="grid">
   {#if myVideo}
     <li class="grid-item bg-dark rounded">
       <Video src={myVideo} mirrored muted />
+      <div class="controls">
+        <Mic active={micActive} on:click={handleMic} />
+        <Cam active={camActive} on:click={handleCam} />
+      </div>
     </li>
   {/if}
   {#each matesVideo as mateVideo (mateVideo.mate.id)}
