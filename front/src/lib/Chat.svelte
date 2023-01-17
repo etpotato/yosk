@@ -1,9 +1,5 @@
 <style>
   .chat-list {
-    display: grid;
-    grid-template-columns: 36px 1fr;
-    grid-gap: 0.25em;
-    align-content: start;
     margin: 0;
     padding: 0;
     width: 320px;
@@ -22,10 +18,19 @@
   }
 
   .chat-message {
-    display: contents;
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    grid-gap: 0.25em;
+    align-content: start;
+    margin-bottom: 0.25rem;
+  }
+
+  .chat-message:last-child {
+    margin-bottom: 0;
   }
 
   .chat-info {
+    grid-column: 1 / -1;
     max-width: max-content;
     margin: 0 auto;
     padding: 0.2em 1.2em;
@@ -35,21 +40,30 @@
     text-align: center;
   }
 
-  .chat-left {
+  .avatar-wrap {
     align-self: end;
-    min-width: 36px;
+    min-width: 48px;
+  }
+
+  .my.avatar-wrap {
+    grid-column: 3 / span 1;
   }
 
   .chat-avatar {
     display: grid;
     place-content: center;
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
   }
 
-  .chat-right {
-    flex: 1 0 auto;
-    padding: 0.3em 0.5em;
+  .msg-wrap {
+    padding: 0.5em 0.7em;
+    grid-column: span 2;
+  }
+
+  .my.msg-wrap {
+    grid-column: 1 / span 2;
+    grid-row: 1;
   }
 
   .chat-text {
@@ -139,13 +153,12 @@
     {#each messages as message (message.id)}
       <li class="chat-message">
         {#if message.type === EMsgType.info}
-          <div />
           <div class="chat-info text-bg-dark bg-opacity-25">
             <b>{message.user.name}</b>
             {message.action === EEventRoom.userJoined ? 'joined' : 'leaved'} the chat
           </div>
         {:else}
-          <div class="chat-left">
+          <div class="avatar-wrap {$user?.id === message.author.id ? 'my' : ''}">
             <div class="chat-avatar bg-body rounded border border-1">
               <img
                 src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
@@ -156,9 +169,9 @@
             </div>
           </div>
           <div
-            class="chat-right rounded small {$user?.id !== message.author.id
-              ? 'bg-body border border-1'
-              : 'bg-dark text-bg-dark'}"
+            class="msg-wrap rounded small {$user?.id === message.author.id
+              ? 'my bg-dark text-bg-dark'
+              : 'bg-body border border-1'}"
           >
             <p class="fw-bold mb-1">{message.author.name}</p>
             <p class="chat-text">{@html message.text}</p>
