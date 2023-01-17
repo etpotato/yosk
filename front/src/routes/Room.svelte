@@ -37,6 +37,7 @@
   import { user } from '../store/user'
   import Chat from '../lib/Chat.svelte'
   import VideoChat from '../lib/VideoChat.svelte'
+  import Share from '../lib/Share.svelte'
 
   type TToast = {
     type: EEventRoom.userLeaved | EEventRoom.userJoined
@@ -100,10 +101,8 @@
   <div class="room">
     <div class="room-video">
       <VideoChat />
-      <Button on:click={() => navigate('/')} outline class="mb-3" color="dark">Home</Button>
-      <div>
-        Room id: {roomId}, user: {$user?.name ? $user?.name : ''}
-      </div>
+      <Button on:click={() => navigate('/')} color="dark">Go Home</Button>
+      <Share />
     </div>
     <div class="room-chat">
       <Chat />
