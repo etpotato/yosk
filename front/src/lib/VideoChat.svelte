@@ -136,41 +136,56 @@
   }
 
   async function getMedia() {
-    let stream = null
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: {
           facingMode: 'user',
         },
       })
+
+      stream?.getAudioTracks().forEach((track) => {
+        track.enabled = micActive
+      })
+      stream?.getVideoTracks().forEach((track) => {
+        track.enabled = camActive
+      })
+
+      return stream
     } catch (err) {
       console.log('getUserMedia all error:', err)
-    } try {
-      stream = await navigator.mediaDevices.getUserMedia({
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
         },
       })
+
+      stream?.getVideoTracks().forEach((track) => {
+        track.enabled = camActive
+      })
+
+      return stream
     } catch (err) {
       console.log('getUserMedia video error:', err)
-    } try {
-      stream = await navigator.mediaDevices.getUserMedia({
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
       })
+
+      stream?.getAudioTracks().forEach((track) => {
+        track.enabled = micActive
+      })
+
+      return stream
     } catch (err) {
       console.log('getUserMedia audio error:', err)
       modalOpen = true
     }
 
-    stream?.getAudioTracks().forEach((track) => {
-      track.enabled = micActive
-    })
-    stream?.getVideoTracks().forEach((track) => {
-      track.enabled = camActive
-    })
-
-    return stream
+    return null
   }
 
   function showVideo({ mate, stream }: MateVideo) {
@@ -210,7 +225,7 @@
       <div class="controls">
         <Mic active={micActive} on:click={handleMic} />
         <Cam active={camActive} on:click={handleCam} />
-        <UserName name={$user?.name}/>
+        <UserName name={$user?.name} />
       </div>
     </li>
   {/if}
@@ -218,7 +233,7 @@
     <li class="grid-item bg-dark rounded">
       <Video src={mateVideo.stream} />
       <div class="controls">
-        <UserName name={mateVideo.mate.name}/>
+        <UserName name={mateVideo.mate.name} />
       </div>
     </li>
   {/each}
