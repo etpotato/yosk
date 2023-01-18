@@ -4,7 +4,8 @@
     grid-gap: 0.25rem;
     grid-template-columns: repeat(2, 1fr);
     margin: 0;
-    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+    padding: 0;
     list-style: none;
   }
 
@@ -58,6 +59,7 @@
   import Video from './Video.svelte'
   import Mic from './Mic.svelte'
   import Cam from './Cam.svelte'
+  import UserName from './UserName.svelte'
 
   type MateVideo = { mate: TUser; stream: MediaStream }
 
@@ -208,12 +210,16 @@
       <div class="controls">
         <Mic active={micActive} on:click={handleMic} />
         <Cam active={camActive} on:click={handleCam} />
+        <UserName name={$user?.name}/>
       </div>
     </li>
   {/if}
   {#each matesVideo as mateVideo (mateVideo.mate.id)}
     <li class="grid-item bg-dark rounded">
       <Video src={mateVideo.stream} />
+      <div class="controls">
+        <UserName name={mateVideo.mate.name}/>
+      </div>
     </li>
   {/each}
 </ul>

@@ -6,6 +6,19 @@
     grid-template-columns: 1fr auto;
   }
 
+  .room-video {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: 0.5rem 0;
+  }
+
+  .room-controls {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: auto;
+  }
+
   .noroom {
     display: grid;
     place-content: center;
@@ -112,8 +125,10 @@
   <div class="room">
     <div class="room-video">
       <VideoChat />
-      <Button on:click={() => navigate('/')} color="dark">Go Home</Button>
-      <Share on:click={handleShare} />
+      <div class="room-controls">
+        <Button on:click={() => navigate('/')} color="dark">Go Home</Button>
+        <Share on:click={handleShare} />
+      </div>
     </div>
     <div class="room-chat">
       <Chat />
