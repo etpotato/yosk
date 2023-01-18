@@ -2,11 +2,16 @@
   .grid {
     display: grid;
     grid-gap: 0.25rem;
-    grid-template-columns: repeat(2, 1fr);
     margin: 0;
     margin-bottom: 0.5rem;
     padding: 0;
     list-style: none;
+  }
+
+  @media (min-width: 540px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   .grid-item {
@@ -23,6 +28,7 @@
     bottom: 0;
     left: 0;
     display: flex;
+    align-items: flex-end;
     gap: 0.25rem;
     padding: 0.25rem;
     opacity: 0.8;

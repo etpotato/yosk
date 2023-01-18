@@ -1,9 +1,14 @@
 <style>
   .room {
     min-height: 100vh;
-    display: grid;
-    grid-gap: 8px;
-    grid-template-columns: 1fr auto;
+  }
+
+  @media (min-width: 900px) {
+    .room {
+      display: grid;
+      grid-gap: 8px;
+      grid-template-columns: 1fr auto;
+    }
   }
 
   .room-video {
@@ -54,14 +59,16 @@
 
   const SHARE = 'share'
 
-  type TToast = {
-    id: number
-    type: EEventRoom.userLeaved | EEventRoom.userJoined
-    name: TUser['name']
-  } | {
-    id: number
-    type: typeof SHARE
-  }
+  type TToast =
+    | {
+        id: number
+        type: EEventRoom.userLeaved | EEventRoom.userJoined
+        name: TUser['name']
+      }
+    | {
+        id: number
+        type: typeof SHARE
+      }
 
   export let roomId: TRoom['id']
   let roomExist = true

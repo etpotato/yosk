@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from 'sveltestrap'
-  
+
   export let name = ''
 </script>
 
-<Button class="ms-auto rounded-pill" color="dark" disabled>{name}</Button>
+<Button class="user-name ms-auto rounded-pill" color="dark" size="sm" disabled>{name}</Button>

@@ -2,19 +2,22 @@
   .chat-list {
     margin: 0;
     padding: 0;
-    width: 320px;
-    min-width: 25vw;
     list-style: none;
     overflow: auto;
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  @media (min-width: 900px) {
+    .chat-list {
+      width: 320px;
+      min-width: 25vw;
+    }
   }
 
   .chat-list::-webkit-scrollbar {
     display: none;
-  }
-
-  .chat-list {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 
   .chat-message {
