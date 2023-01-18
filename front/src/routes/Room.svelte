@@ -39,9 +39,15 @@
   import VideoChat from '../lib/VideoChat.svelte'
   import Share from '../lib/Share.svelte'
 
+  const SHARE = 'share'
+
   type TToast = {
+    id: number
     type: EEventRoom.userLeaved | EEventRoom.userJoined
-    mate: TUser
+    name: TUser['name']
+  } | {
+    id: number
+    type: typeof SHARE
   }
 
   export let roomId: TRoom['id']
@@ -49,6 +55,7 @@
   let modalOpen = true
   let name = ''
   let toasts: TToast[] = []
+  let toastId = 0
   let toastTimeouts: ReturnType<typeof setTimeout>[] = []
 
   function checkRoom(id: TRoom['id']) {
@@ -80,11 +87,15 @@
   })
 
   function handleMateJoined(mate: TUser) {
-    addToast({ type: EEventRoom.userJoined, mate })
+    addToast({ id: toastId++, type: EEventRoom.userJoined, name: mate.name })
   }
 
   function handleMateLeaved(mate: TUser) {
-    addToast({ type: EEventRoom.userLeaved, mate })
+    addToast({ id: toastId++, type: EEventRoom.userLeaved, name: mate.name })
+  }
+
+  function handleShare() {
+    addToast({ id: toastId++, type: SHARE })
   }
 
   function addToast(newToast: TToast) {
@@ -102,7 +113,7 @@
     <div class="room-video">
       <VideoChat />
       <Button on:click={() => navigate('/')} color="dark">Go Home</Button>
-      <Share />
+      <Share on:click={handleShare} />
     </div>
     <div class="room-chat">
       <Chat />
@@ -127,14 +138,16 @@
     </Modal>
   </div>
   <div class="toast-list">
-    {#each toasts as toast (toast.mate.id)}
+    {#each toasts as toast (toast.id)}
       <div transition:scale={{ opacity: 0, start: 0.7 }} class="toast-wrap">
         <Toast>
           <ToastBody>
             {#if toast.type === EEventRoom.userJoined}
-              Say hi to <b>{toast.mate.name}</b> 👋
-            {:else}
-              Bye <b>{toast.mate.name}</b> 🤙
+              Say hi to <b>{toast.name}</b> 👋
+            {:else if toast.type === EEventRoom.userLeaved}
+              Bye <b>{toast.name}</b> 🤙
+            {:else if toast.type === 'share'}
+              Link copied to clipboard
             {/if}
           </ToastBody>
         </Toast>

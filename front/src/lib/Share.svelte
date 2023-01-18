@@ -16,7 +16,7 @@
   }
 </script>
 
-<Button on:click={handleCopy} color="dark" outline type="button">
+<Button on:click={handleCopy} on:click color="dark" outline type="button">
   Copy invite link
   <svg viewBox="0 0 24 24" fill="none" class="icon">
     <path
