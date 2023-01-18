@@ -12,14 +12,19 @@ import User from './user'
 import { createUserMessage, createInfoMessage, createName } from './utils'
 import Rooms from './rooms'
 
-const PORT = 3012
+console.log('process.env', process.env)
+const { PORT, ORIGIN } = process.env
+
+if (!(PORT && ORIGIN)) {
+  throw new Error('no env variables')
+}
 
 const rooms = new Rooms()
 const users = new Map<TUser['id'], TUser>()
 
 const io = new Server<TClientToServerEvents, TServerToClientEvents>({
   cors: {
-    origin: 'http://localhost:5173',
+    origin: ORIGIN,
   },
 })
 
@@ -138,6 +143,6 @@ io.on('connection', (socket) => {
  * setup peer connection
  */
 
-io.listen(PORT)
+io.listen(Number(PORT))
 
 console.log(`server is listening on port ${PORT} \n`)

@@ -1,5 +1,6 @@
 back/node_modules
 back/build
+back/*.local
 
 front/node_modules
 front/dist
