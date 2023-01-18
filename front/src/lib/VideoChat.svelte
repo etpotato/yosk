@@ -143,7 +143,21 @@
         },
       })
     } catch (err) {
-      console.log('getUserMedia error', err)
+      console.log('getUserMedia all error:', err)
+    } try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+        },
+      })
+    } catch (err) {
+      console.log('getUserMedia video error:', err)
+    } try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      })
+    } catch (err) {
+      console.log('getUserMedia audio error:', err)
       modalOpen = true
     }
 
