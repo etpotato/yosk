@@ -18,7 +18,7 @@
     position: relative;
     display: grid;
     place-content: center;
-    aspect-ratio: 4/3;
+    padding-top: 75%;
     overflow: hidden;
   }
 
@@ -83,6 +83,7 @@
     userUnsuscribe = user.subscribe(createPeerConn)
     socket.on(EEventRoom.userJoined, handleMateJoined)
     socket.on(EEventRoom.userLeaved, handleMateLeaved)
+    console.log(window.MediaStream)
   })
 
   onDestroy(() => {
