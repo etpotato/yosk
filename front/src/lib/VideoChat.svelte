@@ -123,7 +123,7 @@
   }
 
   async function handleMateJoined(mate: TUser) {
-    if (!myPeer) return
+    if (!myPeer || !mate.id) return
     // setup peer connection with new mate
     const conn = myPeer.connect(mate.id)
     peerCons.push(conn)
@@ -138,6 +138,7 @@
 
   function handleMateLeaved(mate: TUser) {
     // do we need to close this peer connection?
+    if (!mate?.id) return
     matesVideo = matesVideo.filter((item) => item.mate.id !== mate.id)
   }
 
