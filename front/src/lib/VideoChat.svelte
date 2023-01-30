@@ -83,7 +83,6 @@
     userUnsuscribe = user.subscribe(createPeerConn)
     socket.on(EEventRoom.userJoined, handleMateJoined)
     socket.on(EEventRoom.userLeaved, handleMateLeaved)
-    console.log(window.MediaStream)
   })
 
   onDestroy(() => {
