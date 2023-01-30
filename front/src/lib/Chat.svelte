@@ -152,7 +152,7 @@
 </script>
 
 <div class="d-flex flex-column vh-100 py-2">
-  <ul class="chat-list flex-grow-1 mb-1 bg-primary bg-opacity-10 rounded p-2" bind:this={chatList}>
+  <ul class="chat-list flex-grow-1 mb-1 bg-primary bg-opacity-10 rounded p-2 border" bind:this={chatList}>
     {#each messages as message (message.id)}
       <li class="chat-message">
         {#if message.type === EMsgType.info}

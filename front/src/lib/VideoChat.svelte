@@ -139,7 +139,7 @@
   function handleMateLeaved(mate: TUser) {
     // do we need to close this peer connection?
     if (!mate?.id) return
-    matesVideo = matesVideo.filter((item) => item.mate.id !== mate.id)
+    matesVideo = matesVideo.filter((item) => item.mate?.id !== mate.id)
   }
 
   async function getMedia() {
