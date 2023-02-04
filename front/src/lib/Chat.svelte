@@ -80,17 +80,27 @@
     text-align: right;
   }
 
+  .chat-form {
+    position: relative;
+  }
+
   .chat-input {
+    padding-right: 48px;
+    max-height: 150px;
     resize: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .chat-input::-webkit-scrollbar {
     display: none;
   }
 
-  .chat-input {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  .chat-send {
+    position: absolute;
+    bottom: 0.25rem;
+    right: 0.25rem;
+    opacity: 0.8;
   }
 </style>
 
@@ -101,9 +111,11 @@
 
   import type { TMessageReq, TMessageRes } from '@dto'
   import socket from './ws'
+  import Send from './Send.svelte'
   import formatTime from '../utils/formatTime'
   import { user } from '../store/user'
 
+  let textarea: HTMLTextAreaElement
   let input: TMessageReq = ''
   let messages: TMessageRes[] = []
   let chatList: HTMLElement
@@ -113,7 +125,7 @@
     const msg = input.trim()
     if (!msg) return
     socket.emit(EEventMsg.sent, msg)
-    input = ''
+    resetInput()
   }
 
   const handleEnter = (evt: KeyboardEvent) => {
@@ -129,6 +141,15 @@
           text: Autolinker.link(msg.text, { className: 'text-link' }),
         }
       : msg
+  }
+
+  function resizeInput() {
+    textarea.style.height = `${textarea.scrollHeight}px`
+  }
+
+  function resetInput() {
+    input = ''
+    textarea.style.height = 'auto'
   }
 
   onMount(() => {
@@ -187,13 +208,18 @@
     {/each}
   </ul>
 
-  <form action="/" on:submit={sendMessage}>
+  <form action="/" on:submit={sendMessage} class="chat-form">
     <textarea
       class="chat-input form-control"
+      bind:this={textarea}
+      on:input={resizeInput}
       bind:value={input}
       on:keydown={handleEnter}
       placeholder="Enter message"
-      rows={3}
+      rows={1}
     />
+    <div class="chat-send">
+      <Send />
+    </div>
   </form>
 </div>

@@ -96,6 +96,10 @@
     checkRoom(roomId)
     socket.on(EEventRoom.userJoined, handleMateJoined)
     socket.on(EEventRoom.userLeaved, handleMateLeaved)
+    window.addEventListener('beforeunload unload', () => {
+      socket.emit(EEventRoom.leave)
+      socket.disconnect()
+    })
   })
 
   onDestroy(() => {
