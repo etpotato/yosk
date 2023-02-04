@@ -32,7 +32,7 @@
   onMount(() => {
     if (src) {
       videoEl.srcObject = src
-      document.addEventListener('click', () => videoEl.play(), { once: true })
+      document.addEventListener('click', () => videoEl?.play(), { once: true })
     }
   })
 </script>
