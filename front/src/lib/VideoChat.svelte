@@ -1,16 +1,16 @@
 <style>
   .grid {
     display: grid;
+    grid-template-columns: repeat(2, 1fr);
     grid-gap: 0.25rem;
-    margin: 0;
-    margin-bottom: 0.5rem;
+    margin: auto 0;
     padding: 0;
     list-style: none;
   }
 
   @media (min-width: 540px) {
     .grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     }
   }
 
@@ -18,12 +18,19 @@
     position: relative;
     display: grid;
     place-content: center;
-    padding-top: 75%;
+    padding-top: 100%;
     overflow: hidden;
+  }
+
+  @media (min-width: 900px) {
+    .grid-item {
+      padding-top: 75%;
+    }
   }
 
   .controls {
     position: absolute;
+    top: 0;
     right: 0;
     bottom: 0;
     left: 0;
@@ -31,18 +38,26 @@
     align-items: flex-end;
     gap: 0.25rem;
     padding: 0.25rem;
+    opacity: 0;
+    transition: 0.2s opacity ease-in-out;
+  }
+
+  .grid-item:hover .controls,
+  .grid-item:focus-within .controls {
     opacity: 0.8;
   }
 
-  @media (hover: hover) {
-    .controls {
-      opacity: 0.2;
-      transition: 0.3s opacity;
-    }
+  .name {
+    position: absolute;
+    top: 0.25rem;
+    left: 0.25rem;
+    right: 0.25rem;
+  }
 
-    .grid-item:hover .controls,
-    .grid-item:focus-within .controls {
-      opacity: 0.8;
+  @media (min-width: 900px) {
+    .name {
+      position: static;
+      margin-left: auto;
     }
   }
 
@@ -232,7 +247,9 @@
       <div class="controls">
         <Mic active={micActive} on:click={handleMic} />
         <Cam active={camActive} on:click={handleCam} />
-        <UserName name={$user?.name} />
+        <div class="name">
+          <UserName name={$user?.name} />
+        </div>
       </div>
     </li>
   {/if}
@@ -240,7 +257,9 @@
     <li class="grid-item bg-dark rounded">
       <Video src={mateVideo.stream} />
       <div class="controls">
-        <UserName name={mateVideo.mate.name} />
+        <div class="name">
+          <UserName name={mateVideo.mate.name} />
+        </div>
       </div>
     </li>
   {/each}

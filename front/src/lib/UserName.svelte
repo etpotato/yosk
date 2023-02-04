@@ -4,4 +4,4 @@
   export let name = ''
 </script>
 
-<Button class="user-name ms-auto rounded-pill" color="dark" size="sm" disabled>{name}</Button>
+<Button class="user-name rounded-pill" color="dark" size="sm" disabled>{name}</Button>

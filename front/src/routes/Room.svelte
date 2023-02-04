@@ -21,7 +21,7 @@
   .room-controls {
     display: flex;
     gap: 0.25rem;
-    margin-top: auto;
+    margin-top: 0.5rem;
   }
 
   .noroom {
