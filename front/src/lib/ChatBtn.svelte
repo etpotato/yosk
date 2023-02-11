@@ -22,6 +22,7 @@
     color: var(--bs-white);
     background-color: var(--bs-primary);
     border-radius: 100em;
+    -webkit-transform: translate(18px, -18px);
     transform: translate(18px, -18px);
   }
 </style>
