@@ -1,5 +1,5 @@
 module.exports = {
-  svelteSortOrder: 'options-styles-scripts-markup',
+  svelteSortOrder: 'options-scripts-markup-styles',
   printWidth: 100,
   tabWidth: 2,
   singleQuote: true,
