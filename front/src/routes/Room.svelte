@@ -3,6 +3,7 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
   }
 
   @media (min-width: 900px) {
@@ -90,6 +91,7 @@
     display: grid;
     place-content: center;
     min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
   }
 
   .toast-list {

@@ -3,7 +3,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 0.25rem;
-    max-height: calc(100vh - 54px);
+    max-height: calc((var(--vh, 1vh) * 100) - 54px);
     margin: 0;
     margin-bottom: auto;
     padding: 0;
