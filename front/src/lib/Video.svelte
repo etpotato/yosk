@@ -38,4 +38,4 @@
   })
 </script>
 
-<video bind:this={videoEl} {muted} class:mirrored class="video" autoplay playsinline/>
+<video bind:this={videoEl} {muted} class:mirrored class="video rounded" autoplay playsinline/>
