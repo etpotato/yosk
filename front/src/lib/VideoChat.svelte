@@ -138,10 +138,9 @@
     })
     // mates will call
     myPeer.on('call', async (call) => {
-      const stream = myVideo
-      if (!stream) return
+      const myStream = myVideo || undefined
+      call.answer(myStream)
       const mate = call.metadata.user as TUser
-      call.answer(stream)
       call.once('stream', (stream) => {
         showVideo({ mate, stream })
       })
@@ -156,9 +155,9 @@
     conn.on('open', () => conn.send('hi from existing mate'))
     conn.on('data', (data) => console.log(data))
     // call mate with my video stream
-    const stream = myVideo
-    if (!stream) return
-    const call = myPeer.call(mate.id, stream, { metadata: { user: $user } })
+    const myStream = myVideo
+    if (!myStream) return
+    const call = myPeer.call(mate.id, myStream, { metadata: { user: $user } })
     call.once('stream', (stream) => showVideo({ mate, stream }))
   }
 
