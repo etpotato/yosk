@@ -1,8 +1,7 @@
 <style>
   .icon {
-    width: 1.5em;
-    height: 1.5em;
-    vertical-align: bottom;
+    width: 1rem;
+    height: 1rem;
   }
 </style>
 
@@ -16,14 +15,10 @@
   }
 </script>
 
-<Button on:click={handleCopy} on:click color="dark" outline type="button">
+<Button on:click={handleCopy} on:click color="dark" outline class="d-flex align-items-center" type="button">
   Copy invite link
-  <svg viewBox="0 0 24 24" fill="none" class="icon">
-    <path
-      d="M5 6C5 4.34315 6.34315 3 8 3H13.1716C13.702 3 14.2107 3.21071 14.5858 3.58579L18.4142 7.41421C18.7893 7.78929 19 8.29799 19 8.82843V18C19 19.6569 17.6569 21 16 21H8C6.34315 21 5 19.6569 5 18V6Z"
-      stroke="currentColor"
-      stroke-width="1.5"
-    />
-    <path d="M13 3V5C13 7.20914 14.7909 9 17 9H19" stroke="currentColor" stroke-width="1.5" />
+  <svg class="icon ms-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <path stroke="currentColor" stroke-width="2" d="M10 13a3 3 0 0 1 3-3h5a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-5a3 3 0 0 1-3-3v-5Z"/>
+    <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M14 6.208V6a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v5a3 3 0 0 0 3 3h.208"/>
   </svg>
 </Button>

@@ -3,14 +3,25 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 0.25rem;
-    margin: auto 0;
+    max-height: calc(100vh - 54px);
+    margin: 0;
+    margin-bottom: auto;
     padding: 0;
+    padding-bottom: 0.5rem;
     list-style: none;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
   }
 
   @media (min-width: 540px) {
     .grid {
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      margin: auto 0;
     }
   }
 
