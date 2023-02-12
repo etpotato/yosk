@@ -102,12 +102,13 @@
   import Mic from './Mic.svelte'
   import Cam from './Cam.svelte'
   import UserName from './UserName.svelte'
+  import { getMedia } from '../utils/getMedia'
 
   type MateVideo = { mate: TUser; stream: MediaStream }
 
   let myPeer: Peer | null = null
   let peerCons: DataConnection[] = []
-  let modalOpen = false
+  let errorModalOpen = false
   let myVideo: MediaStream | null = null
   let micActive = true
   let camActive = true
@@ -115,7 +116,7 @@
   let userUnsuscribe: Unsubscriber
 
   onMount(async () => {
-    myVideo = await getMedia()
+    await getInitialMedia()
     userUnsuscribe = user.subscribe(createMyPeer)
     socket.on(EEventRoom.userJoined, handleMateJoined)
     socket.on(EEventRoom.userLeaved, handleMateLeaved)
@@ -131,6 +132,16 @@
       myVideo.getTracks().forEach((track) => track.stop())
     }
   })
+
+  async function getInitialMedia() {
+    const getMediaResult = await getMedia({ micActive, camActive })
+
+    if (getMediaResult.error) {
+      errorModalOpen = true
+    }
+
+    myVideo = getMediaResult.stream
+  }
 
   function createMyPeer(user: TUser | null) {
     if (!user) {
@@ -182,70 +193,13 @@
     matesVideo = matesVideo.filter((item) => item.mate?.id !== mate.id)
   }
 
-  async function getMedia() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: {
-          facingMode: 'user',
-          width: 1280,
-          height: 720,
-        },
-      })
-
-      stream?.getAudioTracks().forEach((track) => {
-        track.enabled = micActive
-      })
-      stream?.getVideoTracks().forEach((track) => {
-        track.enabled = camActive
-      })
-
-      return stream
-    } catch (err) {
-      console.log('getUserMedia all error:', err)
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: 1280,
-          height: 720,
-        },
-      })
-
-      stream?.getVideoTracks().forEach((track) => {
-        track.enabled = camActive
-      })
-
-      return stream
-    } catch (err) {
-      console.log('getUserMedia video error:', err)
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      })
-
-      stream?.getAudioTracks().forEach((track) => {
-        track.enabled = micActive
-      })
-
-      return stream
-    } catch (err) {
-      console.log('getUserMedia audio error:', err)
-      modalOpen = true
-    }
-
-    return null
-  }
-
   function showVideo({ mate, stream }: MateVideo) {
     matesVideo = [...matesVideo, { mate, stream }]
   }
 
-  function closeModal(evt: Event) {
+  function handleReload(evt: Event) {
     evt.preventDefault()
-    modalOpen = false
+    errorModalOpen = false
   }
 
   function handleMic(evt: Event) {
@@ -297,14 +251,13 @@
     </li>
   {/each}
 </ul>
-<Modal isOpen={modalOpen} size="md" centered>
+<Modal isOpen={errorModalOpen} size="md" centered>
   <ModalBody class="p-4">
-    <p>
-      There is an error with your video. Try to reload the page and give permissions to capture
-      video and audio
+    <p class="text-center">
+      There is an&nbsp;error with your media. Try to&nbsp;reload the&nbsp;page and&nbsp;give permissions to&nbsp;capture
+      video and&nbsp;audio
     </p>
-    <Button on:click={closeModal} color="dark" outline type="submit" class="d-block w-100" size="lg"
-      >Ok</Button
-    >
+    <Button on:click={handleReload} color="dark" outline type="submit" class="d-block w-100" size="lg"
+      >Ok</Button>
   </ModalBody>
 </Modal>
