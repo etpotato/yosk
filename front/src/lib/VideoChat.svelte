@@ -20,8 +20,14 @@
 
   @media (min-width: 540px) {
     .grid {
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(40%, 1fr));
       margin: auto 0;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .grid {
+      grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
     }
   }
 
@@ -69,12 +75,6 @@
     .name {
       position: static;
       margin-left: auto;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .grid {
-      grid-template-columns: repeat(3, 1fr);
     }
   }
 </style>
