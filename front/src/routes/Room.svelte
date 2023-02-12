@@ -178,9 +178,9 @@
   function handleChatToggle(evt?: Event) {
     (evt?.currentTarget as HTMLButtonElement)?.blur()
     chatOpen = !chatOpen
-    
+
     if (chatOpen) {
-      window.addEventListener('keydown', handleChatEsc) 
+      window.addEventListener('keydown', handleChatEsc)
     } else {
       window.removeEventListener('keydown', handleChatEsc)
     }
@@ -216,57 +216,58 @@
 </script>
 
 {#if roomExist}
-  <div class="room">
-    <div class="room-video">
-      <VideoChat />
-      <div class="room-controls">
-        <Button on:click={() => navigate('/')} color="dark">Go Home</Button>
-        <Share on:click={handleShare} />
-        <ChatBtn count={33} on:click={handleChatToggle}/>
+  <Modal isOpen={modalOpen} size="md" centered>
+    <ModalBody class="p-4">
+      <form action="/" on:submit={joinRoom}>
+        <Label for="name">Your name</Label>
+        <Input
+          bind:value={name}
+          name="name"
+          type="text"
+          id="name"
+          placeholder="Name"
+          class="mb-3"
+          bsSize="lg"
+        />
+        <Button color="dark" outline type="submit" class="d-block w-100" size="lg">Yes</Button>
+      </form>
+    </ModalBody>
+  </Modal>
+  {#if !modalOpen}
+    <div class="room">
+      <div class="room-video">
+        <VideoChat />
+        <div class="room-controls">
+          <Button on:click={() => navigate('/')} color="dark">Go Home</Button>
+          <Share on:click={handleShare} />
+          <ChatBtn count={33} on:click={handleChatToggle}/>
+        </div>
+      </div>
+      <div class="room-chat bg-white {chatOpen ? 'open' : ''}">
+        <div class="room-chat-close">
+          <Close on:click={handleChatToggle} />
+        </div>
+        <Chat />
       </div>
     </div>
-    <div class="room-chat bg-white {chatOpen ? 'open' : ''}">
-      <div class="room-chat-close">
-        <Close on:click={handleChatToggle} />
-      </div>
-      <Chat />
+    <div class="toast-list">
+      {#each toasts as toast (toast.id)}
+        <div transition:scale={{ opacity: 0, start: 0.7 }} class="toast-wrap">
+          <Toast>
+            <ToastBody>
+              {#if toast.type === EEventRoom.userJoined}
+                Say hi to <b>{toast.name}</b> 👋
+              {:else if toast.type === EEventRoom.userLeaved}
+                Bye <b>{toast.name}</b> 🤙
+              {:else if toast.type === 'share'}
+                Link copied to clipboard
+              {/if}
+            </ToastBody>
+          </Toast>
+        </div>
+      {/each}
     </div>
-
-    <Modal isOpen={modalOpen} size="md" centered>
-      <ModalBody class="p-4">
-        <form action="/" on:submit={joinRoom}>
-          <Label for="name">Your name</Label>
-          <Input
-            bind:value={name}
-            name="name"
-            type="text"
-            id="name"
-            placeholder="Name"
-            class="mb-3"
-            bsSize="lg"
-          />
-          <Button color="dark" outline type="submit" class="d-block w-100" size="lg">Yes</Button>
-        </form>
-      </ModalBody>
-    </Modal>
-  </div>
-  <div class="toast-list">
-    {#each toasts as toast (toast.id)}
-      <div transition:scale={{ opacity: 0, start: 0.7 }} class="toast-wrap">
-        <Toast>
-          <ToastBody>
-            {#if toast.type === EEventRoom.userJoined}
-              Say hi to <b>{toast.name}</b> 👋
-            {:else if toast.type === EEventRoom.userLeaved}
-              Bye <b>{toast.name}</b> 🤙
-            {:else if toast.type === 'share'}
-              Link copied to clipboard
-            {/if}
-          </ToastBody>
-        </Toast>
-      </div>
-    {/each}
-  </div>
+  {/if}
 {:else}
   <div class="noroom">
     <h1 class="h2 mb-4">Room not found :(</h1>

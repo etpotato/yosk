@@ -254,8 +254,7 @@
 <Modal isOpen={errorModalOpen} size="md" centered>
   <ModalBody class="p-4">
     <p class="text-center">
-      There is an&nbsp;error with your media. Try to&nbsp;reload the&nbsp;page and&nbsp;give permissions to&nbsp;capture
-      video and&nbsp;audio
+      There is an&nbsp;error with your media. Please, allow this page to&nbsp;use your&nbsp;camera and&nbsp;microphone in&nbsp;the&nbsp;site settings
     </p>
     <Button on:click={handleReload} color="dark" outline type="submit" class="d-block w-100" size="lg"
       >Ok</Button>
