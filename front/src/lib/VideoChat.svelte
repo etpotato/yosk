@@ -20,18 +20,22 @@
 
   @media (min-width: 540px) {
     .grid {
-      grid-template-columns: repeat(auto-fit, minmax(40%, 1fr));
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0.25rem;
       margin: auto 0;
     }
   }
 
-  @media (min-width: 1280px) {
-    .grid {
-      grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
+  @media (min-width: 540px) {
+    .grid-item {
+      flex: 0 0 min(49%, 30vw);
     }
   }
 
-  .grid-item {
+  .video-wrap {
     position: relative;
     display: grid;
     place-content: center;
@@ -40,7 +44,7 @@
   }
 
   @media (min-width: 900px) {
-    .grid-item {
+    .video-wrap {
       padding-top: 56.25%;
     }
   }
@@ -257,22 +261,26 @@
 <ul class="grid">
   {#if myVideo}
     <li class="grid-item bg-dark rounded">
-      <Video src={myVideo} mirrored muted />
-      <div class="controls">
-        <Mic active={micActive} on:click={handleMic} />
-        <Cam active={camActive} on:click={handleCam} />
-        <div class="name">
-          <UserName name={$user?.name} />
+      <div class="video-wrap">
+        <Video src={myVideo} mirrored muted />
+        <div class="controls">
+          <Mic active={micActive} on:click={handleMic} />
+          <Cam active={camActive} on:click={handleCam} />
+          <div class="name">
+            <UserName name={$user?.name} />
+          </div>
         </div>
       </div>
     </li>
   {/if}
   {#each matesVideo as mateVideo (mateVideo.mate.id)}
     <li class="grid-item bg-dark rounded">
-      <Video src={mateVideo.stream} />
-      <div class="controls">
-        <div class="name">
-          <UserName name={mateVideo.mate.name} />
+      <div class="video-wrap">
+        <Video src={mateVideo.stream} />
+        <div class="controls">
+          <div class="name">
+            <UserName name={mateVideo.mate.name} />
+          </div>
         </div>
       </div>
     </li>
