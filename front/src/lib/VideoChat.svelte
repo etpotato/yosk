@@ -41,7 +41,7 @@
 
   @media (min-width: 900px) {
     .grid-item {
-      padding-top: 75%;
+      padding-top: 56.25%;
     }
   }
 
@@ -173,6 +173,8 @@
         audio: true,
         video: {
           facingMode: 'user',
+          width: 1280, 
+          height: 720,
         },
       })
 
@@ -191,6 +193,8 @@
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
+          width: 1280, 
+          height: 720,
         },
       })
 
