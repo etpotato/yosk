@@ -18,7 +18,7 @@
     display: none;
   }
 
-  @media (min-width: 540px) {
+  @media (min-width: 900px) {
     .grid {
       display: flex;
       flex-wrap: wrap;
@@ -29,9 +29,15 @@
     }
   }
 
-  @media (min-width: 540px) {
+  @media (min-width: 900px) {
     .grid-item {
-      flex: 0 0 min(49%, 30vw);
+      flex: 0 0 min(49%, 35vw);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .grid-item {
+      flex: 0 0 min(49%, 32vw);
     }
   }
 
@@ -43,7 +49,7 @@
     overflow: hidden;
   }
 
-  @media (min-width: 900px) {
+  @media (min-aspect-ratio: 1 / 1) {
     .video-wrap {
       padding-top: 56.25%;
     }
