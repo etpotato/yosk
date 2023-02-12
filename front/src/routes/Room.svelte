@@ -54,13 +54,11 @@
     grid-template-rows: auto calc(100% - 30px);
     grid-gap: 0.25rem;
     padding: 0.5rem;
-    -webkit-transform: translateY(100%);
     transform: translateY(100%);
     transition: transform 0.3s ease-in;
   }
 
   .room-chat.open {
-    -webkit-transform: none;
     transform: none;
     transition: transform 0.3s ease-out;
   }
@@ -70,7 +68,6 @@
       position: static;
       display: none;
       padding: 0.5rem 0;
-      -webkit-transform: none;
       transform: none;
     }
 
@@ -102,7 +99,6 @@
     top: 8px;
     left: 50%;
     max-width: calc(100vw - 16px);
-    -webkit-transform: translateX(-50%);
     transform: translateX(-50%);
   }
 

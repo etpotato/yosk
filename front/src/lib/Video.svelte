@@ -10,7 +10,6 @@
   }
 
   .video.mirrored {
-    -webkit-transform: rotateY(180deg);
     transform: rotateY(180deg);
   }
 
