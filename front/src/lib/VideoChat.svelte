@@ -116,7 +116,7 @@
 
   onMount(async () => {
     myVideo = await getMedia()
-    userUnsuscribe = user.subscribe(createPeerConn)
+    userUnsuscribe = user.subscribe(createMyPeer)
     socket.on(EEventRoom.userJoined, handleMateJoined)
     socket.on(EEventRoom.userLeaved, handleMateLeaved)
   })
@@ -132,19 +132,19 @@
     }
   })
 
-  function createPeerConn(user: TUser | null) {
+  function createMyPeer(user: TUser | null) {
     if (!user) {
       myPeer?.destroy()
       myPeer = null
       return
     }
-    // user is joined the room, mates get new user info
+    // I'm joining the room, mates are getting my info
     myPeer = new Peer(user.id)
     // mates will connect
     myPeer.on('connection', (conn) => {
       peerCons.push(conn)
       conn.on('data', (data) => console.log(data))
-      conn.on('open', () => conn.send('hello!'))
+      conn.on('open', () => conn.send('hi from new user!'))
     })
     // mates will call
     myPeer.on('call', async (call) => {
@@ -154,21 +154,26 @@
       call.once('stream', (stream) => {
         showVideo({ mate, stream })
       })
+      call.on('close', () => handleMateLeaved(mate))
     })
   }
 
   async function handleMateJoined(mate: TUser) {
+    // new mate joined the room
     if (!myPeer || !mate.id) return
-    // setup peer connection with new mate
+    // I'm setting up peer connection with new mate
     const conn = myPeer.connect(mate.id)
+    if (!conn) return
+
     peerCons.push(conn)
     conn.on('open', () => conn.send('hi from existing mate'))
     conn.on('data', (data) => console.log(data))
-    // call mate with my video stream
+    // I'm calling new mate with my video stream
     const myStream = myVideo
     if (!myStream) return
     const call = myPeer.call(mate.id, myStream, { metadata: { user: $user } })
     call.once('stream', (stream) => showVideo({ mate, stream }))
+    conn.on('close', () => handleMateLeaved(mate))
   }
 
   function handleMateLeaved(mate: TUser) {
@@ -183,7 +188,7 @@
         audio: true,
         video: {
           facingMode: 'user',
-          width: 1280, 
+          width: 1280,
           height: 720,
         },
       })
@@ -203,7 +208,7 @@
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
-          width: 1280, 
+          width: 1280,
           height: 720,
         },
       })
