@@ -123,6 +123,7 @@
   import Share from '../lib/Share.svelte'
   import ChatBtn from '../lib/ChatBtn.svelte'
   import Close from '../lib/Close.svelte'
+  import Home from '../lib/Home.svelte'
   import { getEscHandler } from '../utils/getEscHandler'
 
   const SHARE = 'share'
@@ -238,7 +239,7 @@
       <div class="room-video">
         <VideoChat />
         <div class="room-controls">
-          <Button on:click={() => navigate('/')} color="dark">Go Home</Button>
+          <Home on:click={() => navigate('/')} />
           <Share on:click={handleShare} />
           <ChatBtn count={33} on:click={handleChatToggle}/>
         </div>
