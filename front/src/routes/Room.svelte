@@ -103,10 +103,8 @@
   }
 
   .noroom {
-    display: grid;
-    place-content: center;
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
+    text-align: center;
+    white-space: nowrap;
   }
 
   .toast-list {
@@ -141,6 +139,7 @@
   import Home from '../lib/Home.svelte'
   import Mic from '../lib/Mic.svelte'
   import Cam from '../lib/Cam.svelte'
+  import InitialLayout from '../lib/InitialLayout.svelte';
   import { getEscHandler } from '../utils/getEscHandler'
 
   const SHARE = 'share'
@@ -157,6 +156,7 @@
       }
 
   export let roomId: TRoom['id']
+  let initialLoad = true
   let roomExist = true
   let modalOpen = true
   let chatOpen = false
@@ -170,6 +170,7 @@
   function checkRoom(id: TRoom['id']) {
     socket.emit(EEventRoom.check, id, (ack) => {
       roomExist = ack
+      initialLoad = false
     })
   }
 
@@ -247,7 +248,14 @@
   })
 </script>
 
-{#if roomExist}
+{#if initialLoad || !roomExist}
+  <InitialLayout>
+    {#if !roomExist}
+      <h1 class="noroom h2 mb-4">Room not found :(</h1>
+      <Link class="btn btn-outline-dark" to="/">Home</Link>
+    {/if}
+  </InitialLayout>
+{:else}
   <Modal isOpen={modalOpen} size="md" centered>
     <ModalBody class="p-4">
       <form action="/" on:submit={joinRoom}>
@@ -308,9 +316,4 @@
       {/each}
     </div>
   {/if}
-{:else}
-  <div class="noroom">
-    <h1 class="h2 mb-4">Room not found :(</h1>
-    <Link class="btn btn-outline-dark" to="/">Home</Link>
-  </div>
 {/if}
