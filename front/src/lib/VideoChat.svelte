@@ -219,9 +219,7 @@
     socket.off(EEventRoom.userJoined, handleMateJoined)
     socket.off(EEventRoom.userLeaved, handleMateLeaved)
 
-    if (myVideo) {
-      myVideo.getTracks().forEach((track) => track.stop())
-    }
+    myVideo?.getTracks().forEach((track) => track.stop())
   })
 </script>
 
