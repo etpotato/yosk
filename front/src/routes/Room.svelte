@@ -28,20 +28,35 @@
 
   .room-controls {
     position: relative;
-    display: flex;
-    gap: 0.25rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    grid-gap: 0.25rem;
     isolation: isolate;
   }
 
   .room-controls::before {
     content: '';
     position: absolute;
-    top: -0.5rem;
+    top: -0.6rem;
     right: -0.5rem;
     left: -0.5rem;
     height: 0.6rem;
     background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
     z-index: -1;
+  }
+
+  .room-control-wrap {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .room-control-left {
+    justify-self: start;
+  }
+
+  .room-control-right {
+    justify-self: end;
   }
 
   .room-chat {
@@ -51,7 +66,7 @@
     bottom: 0;
     left: 0;
     display: grid;
-    grid-template-rows: auto calc(100% - 30px);
+    grid-template-rows: auto calc(100% - 33px);
     grid-gap: 0.25rem;
     padding: 0.5rem;
     transform: translateY(100%);
@@ -124,6 +139,8 @@
   import ChatBtn from '../lib/ChatBtn.svelte'
   import Close from '../lib/Close.svelte'
   import Home from '../lib/Home.svelte'
+  import Mic from '../lib/Mic.svelte'
+  import Cam from '../lib/Cam.svelte'
   import { getEscHandler } from '../utils/getEscHandler'
 
   const SHARE = 'share'
@@ -147,6 +164,8 @@
   let toasts: TToast[] = []
   let toastId = 0
   let toastTimeouts: ReturnType<typeof setTimeout>[] = []
+  let micActive = true
+  let camActive = true
 
   function checkRoom(id: TRoom['id']) {
     socket.emit(EEventRoom.check, id, (ack) => {
@@ -196,6 +215,18 @@
     toastTimeouts.push(timeout)
   }
 
+  function handleMic(evt: Event) {
+    evt.preventDefault()
+    ;(evt.currentTarget as HTMLButtonElement)?.blur()
+    micActive = !micActive
+  }
+
+  function handleCam(evt: Event) {
+    evt.preventDefault()
+    ;(evt.currentTarget as HTMLButtonElement)?.blur()
+    camActive = !camActive
+  }
+
   onMount(() => {
     checkRoom(roomId)
     socket.on(EEventRoom.userJoined, handleMateJoined)
@@ -237,11 +268,19 @@
   {#if !modalOpen}
     <div class="room">
       <div class="room-video">
-        <VideoChat />
+        <VideoChat {micActive} {camActive}/>
         <div class="room-controls">
-          <Home on:click={() => navigate('/')} />
-          <Share on:click={handleShare} />
-          <ChatBtn count={33} on:click={handleChatToggle}/>
+          <div class="room-control-wrap room-control-left">
+            <Home on:click={() => navigate('/')} />
+            <Share on:click={handleShare} />
+          </div>
+          <div class="room-control-wrap">
+            <Mic active={micActive} on:click={handleMic} />
+            <Cam active={camActive} on:click={handleCam} />
+          </div>
+          <div class="room-control-wrap room-control-right">
+            <ChatBtn count={33} on:click={handleChatToggle}/>
+          </div>
         </div>
       </div>
       <div class="room-chat bg-white {chatOpen ? 'open' : ''}">

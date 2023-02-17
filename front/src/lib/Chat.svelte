@@ -12,7 +12,7 @@
   @media (min-width: 900px) {
     .chat-list {
       width: 320px;
-      min-width: 25vw;
+      min-width: 30vw;
     }
   }
 
@@ -85,11 +85,17 @@
   }
 
   .chat-input {
-    padding-right: 48px;
+    padding-right: 64px;
     max-height: 150px;
     resize: none;
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  @media (hover: hover) {
+    .chat-input {
+      font-size: 1rem;
+    }
   }
 
   .chat-input::-webkit-scrollbar {
@@ -98,9 +104,16 @@
 
   .chat-send {
     position: absolute;
-    bottom: 0.25rem;
-    right: 0.25rem;
+    bottom: 0.33rem;
+    right: 0.36rem;
     opacity: 0.8;
+  }
+
+  @media (hover: hover) {
+    .chat-send {
+      bottom: 0.275rem;
+      right: 0.3rem;
+    }
   }
 </style>
 
@@ -210,7 +223,7 @@
 
   <form action="/" on:submit={sendMessage} class="chat-form">
     <textarea
-      class="chat-input form-control"
+      class="chat-input form-control form-control-lg"
       bind:this={textarea}
       on:input={resizeInput}
       bind:value={input}
@@ -218,8 +231,8 @@
       placeholder="Enter message"
       rows={1}
     />
-    <div class="chat-send">
+    <span class="chat-send">
       <Send />
-    </div>
+    </span>
   </form>
 </div>

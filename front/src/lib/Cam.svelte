@@ -1,9 +1,17 @@
 <style>
   .cam {
     display: block;
-    width: 1rem;
-    height: 1rem;
+    width: 1em;
+    height: 1em;
   }
+
+  @media (hover: hover) {
+    .cam {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
 </style>
 
 <script lang="ts">
@@ -12,7 +20,7 @@
   export let active: boolean
 </script>
 
-<Button on:click color="dark" type="button">
+<Button on:click color="dark" type="button" size="lg">
   {#if active}
     <svg viewBox="0 0 24 24" fill="none" class="cam">
       <path

@@ -2,8 +2,15 @@
 <style>
   .mic {
     display: block;
-    width: 1rem;
-    height: 1rem;
+    width: 1em;
+    height: 1em;
+  }
+
+  @media (hover: hover) {
+    .mic {
+      width: 1rem;
+      height: 1rem;
+    }
   }
 </style>
 
@@ -13,7 +20,7 @@
   export let active: boolean
 </script>
 
-<Button on:click color="dark" type="button">
+<Button on:click color="dark" type="button" size="lg">
   {#if active}
     <svg viewBox="0 0 24 24" fill="none" class="mic">
       <path

@@ -9,9 +9,22 @@
     }
   }
 
+  @media (hover: hover) {
+    .text {
+      font-size: 1rem;
+    }
+  }
+
   .icon {
-    width: 1rem;
-    height: 1rem;
+    width: 1em;
+    height: 1em;
+  }
+
+  @media (hover: hover) {
+    .icon {
+      width: 1rem;
+      height: 1rem;
+    }
   }
 </style>
 
@@ -25,7 +38,7 @@
   }
 </script>
 
-<Button on:click={handleCopy} on:click color="dark" outline class="d-flex align-items-center" type="button">
+<Button on:click={handleCopy} on:click color="dark" outline class="d-flex align-items-center" type="button"  size="lg">
   <span class="text me-2">Copy link</span>
   <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
     <path stroke="currentColor" stroke-width="2" d="M10 13a3 3 0 0 1 3-3h5a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-5a3 3 0 0 1-3-3v-5Z"/>

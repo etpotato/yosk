@@ -14,8 +14,10 @@
     scrollbar-width: none;
   }
 
-  .grid::-webkit-scrollbar {
-    display: none;
+  @media (hover: hover) {
+    .grid {
+      max-height: calc((var(--vh, 1vh) * 100) - 50px);
+    }
   }
 
   @media (min-width: 900px) {
@@ -27,6 +29,10 @@
       gap: 0.25rem;
       margin: auto 0;
     }
+  }
+  
+  .grid::-webkit-scrollbar {
+    display: none;
   }
 
   @media (min-width: 900px) {
@@ -99,39 +105,25 @@
   import { user } from '../store/user'
   import socket from './ws'
   import Video from './Video.svelte'
-  import Mic from './Mic.svelte'
-  import Cam from './Cam.svelte'
   import UserName from './UserName.svelte'
   import { getMedia } from '../utils/getMedia'
 
   type MateVideo = { mate: TUser; stream: MediaStream }
 
+  export let micActive = true
+  export let camActive = true
+
   let myPeer: Peer | null = null
   let peerCons: DataConnection[] = []
   let errorModalOpen = false
   let myVideo: MediaStream | null = null
-  let micActive = true
-  let camActive = true
   let matesVideo: MateVideo[] = []
   let userUnsuscribe: Unsubscriber
 
-  onMount(async () => {
-    await getInitialMedia()
-    userUnsuscribe = user.subscribe(createMyPeer)
-    socket.on(EEventRoom.userJoined, handleMateJoined)
-    socket.on(EEventRoom.userLeaved, handleMateLeaved)
-  })
-
-  onDestroy(() => {
-    userUnsuscribe?.()
-    myPeer?.destroy()
-    socket.off(EEventRoom.userJoined, handleMateJoined)
-    socket.off(EEventRoom.userLeaved, handleMateLeaved)
-
-    if (myVideo) {
-      myVideo.getTracks().forEach((track) => track.stop())
-    }
-  })
+  $: {
+    handleMic()
+    handleCam()
+  }
 
   async function getInitialMedia() {
     const getMediaResult = await getMedia({ micActive, camActive })
@@ -202,25 +194,35 @@
     errorModalOpen = false
   }
 
-  function handleMic(evt: Event) {
-    evt.preventDefault()
-    ;(evt.currentTarget as HTMLButtonElement)?.blur()
-
-    micActive = !micActive
+  function handleMic() {
     myVideo?.getAudioTracks().forEach((track) => {
       track.enabled = micActive
     })
   }
 
-  function handleCam(evt: Event) {
-    evt.preventDefault()
-    ;(evt.currentTarget as HTMLButtonElement)?.blur()
-
-    camActive = !camActive
+  function handleCam() {
     myVideo?.getVideoTracks().forEach((track) => {
       track.enabled = camActive
     })
   }
+
+  onMount(async () => {
+    await getInitialMedia()
+    userUnsuscribe = user.subscribe(createMyPeer)
+    socket.on(EEventRoom.userJoined, handleMateJoined)
+    socket.on(EEventRoom.userLeaved, handleMateLeaved)
+  })
+
+  onDestroy(() => {
+    userUnsuscribe?.()
+    myPeer?.destroy()
+    socket.off(EEventRoom.userJoined, handleMateJoined)
+    socket.off(EEventRoom.userLeaved, handleMateLeaved)
+
+    if (myVideo) {
+      myVideo.getTracks().forEach((track) => track.stop())
+    }
+  })
 </script>
 
 <ul class="grid">
@@ -229,8 +231,6 @@
       <div class="video-wrap">
         <Video src={myVideo} mirrored muted />
         <div class="controls">
-          <Mic active={micActive} on:click={handleMic} />
-          <Cam active={camActive} on:click={handleCam} />
           <div class="name">
             <UserName name={$user?.name} />
           </div>

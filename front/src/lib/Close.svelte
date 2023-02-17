@@ -11,7 +11,7 @@
   import { Button } from 'sveltestrap'
 </script>
 
-<Button on:click color="secondary" class="d-block" type="button" size="sm" outline>
+<Button on:click color="light" class="d-block" type="button">
   <svg class="icon" fill="none" viewBox="0 0 24 24">
     <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m6 6 12 12M18 6 6 18"/>
   </svg>
