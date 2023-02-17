@@ -17,7 +17,8 @@
     flex: 1 0 100%;
     display: flex;
     flex-direction: column;
-    padding: 0.5rem 0;
+    padding: 0;
+    padding-bottom: 0.5rem;
   }
 
   @media (min-width: 900px) {
@@ -41,12 +42,12 @@
     top: -0.6rem;
     right: -0.5rem;
     left: -0.5rem;
-    height: 0.6rem;
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
-    z-index: -1;
+    height: 0.7rem;
+    background-image: linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,1) 90%, rgba(255,255,255,1));
   }
 
   .room-control-wrap {
+    position: relative;
     display: flex;
     gap: 0.25rem;
   }
