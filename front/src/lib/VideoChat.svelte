@@ -30,7 +30,7 @@
       margin: auto 0;
     }
   }
-  
+
   .grid::-webkit-scrollbar {
     display: none;
   }
@@ -121,8 +121,12 @@
   let userUnsuscribe: Unsubscriber
 
   $: {
-    handleMic()
-    handleCam()
+    myVideo?.getAudioTracks().forEach((track) => {
+      track.enabled = micActive
+    })
+    myVideo?.getVideoTracks().forEach((track) => {
+      track.enabled = camActive
+    })
   }
 
   async function getInitialMedia() {
@@ -192,18 +196,6 @@
   function handleReload(evt: Event) {
     evt.preventDefault()
     errorModalOpen = false
-  }
-
-  function handleMic() {
-    myVideo?.getAudioTracks().forEach((track) => {
-      track.enabled = micActive
-    })
-  }
-
-  function handleCam() {
-    myVideo?.getVideoTracks().forEach((track) => {
-      track.enabled = camActive
-    })
   }
 
   onMount(async () => {
