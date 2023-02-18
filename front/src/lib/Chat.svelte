@@ -232,7 +232,7 @@
       rows={1}
     />
     <span class="chat-send">
-      <Send />
+      <Send active={input.length > 0}/>
     </span>
   </form>
 </div>

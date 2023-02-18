@@ -4,8 +4,7 @@
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 0.25rem;
     max-height: calc((var(--vh, 1vh) * 100) - 46px);
-    margin: 0;
-    margin-bottom: auto;
+    margin: auto 0;
     padding: 0.5rem 0;
     list-style: none;
     overflow: auto;
@@ -26,7 +25,6 @@
       align-items: flex-start;
       justify-content: center;
       gap: 0.25rem;
-      margin: auto 0;
     }
   }
 
