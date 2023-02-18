@@ -45,7 +45,8 @@
 
   .avatar-wrap {
     align-self: end;
-    min-width: 48px;
+    width: 48px;
+    height: 48px;
   }
 
   .my.avatar-wrap {
@@ -53,10 +54,9 @@
   }
 
   .chat-avatar {
-    display: grid;
-    place-content: center;
-    width: 48px;
-    height: 48px;
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .msg-wrap {
@@ -127,6 +127,7 @@
   import Send from './Send.svelte'
   import formatTime from '../utils/formatTime'
   import { user } from '../store/user'
+  import { getAvatarUrl } from '../utils/getAvatarUrl'
 
   let textarea: HTMLTextAreaElement
   let input: TMessageReq = ''
@@ -194,21 +195,18 @@
             <b>{message.user.name}</b>
             {message.action === EEventRoom.userJoined ? 'joined' : 'leaved'} the chat
           </div>
-        {:else}
-          <div class="avatar-wrap {$user?.id === message.author.id ? 'my' : ''}">
-            <div class="chat-avatar bg-body rounded border border-1">
-              <img
-                src="https://avatars.dicebear.com/api/croodles-neutral/{message.author.id}.svg"
-                alt={message.author.name}
-                width="36"
-                height="36"
-              />
-            </div>
+        {:else if $user?.id === message.author.id}
+          <div class="avatar-wrap my">
+            <img
+              class="chat-avatar bg-dark rounded border border-1"
+              src="{getAvatarUrl({ my: true, id: message.author.id })}"
+              alt={message.author.name}
+              width="46"
+              height="46"
+            />
           </div>
           <div
-            class="msg-wrap rounded small {$user?.id === message.author.id
-              ? 'my bg-dark text-bg-dark'
-              : 'bg-body border border-1'}"
+            class="msg-wrap rounded small my bg-dark text-bg-dark"
           >
             <p class="fw-bold mb-1">{message.author.name}</p>
             <p class="chat-text">{@html message.text}</p>
@@ -216,6 +214,25 @@
               {formatTime(new Date(message.timestamp * 1000))}
             </p>
           </div>
+        {:else}
+          <div class="avatar-wrap">
+            <img
+              class="chat-avatar bg-body rounded border border-1"
+              src="{getAvatarUrl({ my: false, id: message.author.id })}"
+              alt={message.author.name}
+              width="46"
+              height="46"
+            />
+          </div>
+          <div
+            class="msg-wrap rounded small bg-body border border-1"
+          >
+            <p class="fw-bold mb-1">{message.author.name}</p>
+            <p class="chat-text">{@html message.text}</p>
+            <p class="chat-time">
+              {formatTime(new Date(message.timestamp * 1000))}
+            </p>
+          </div>        
         {/if}
       </li>
     {/each}
