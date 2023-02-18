@@ -60,49 +60,6 @@
     justify-self: end;
   }
 
-  .room-chat {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: grid;
-    grid-template-rows: auto calc(100% - 33px);
-    grid-gap: 0.25rem;
-    padding: 0.5rem;
-    transform: translateY(100%);
-    transition: transform 0.3s ease-in;
-  }
-
-  .room-chat.open {
-    transform: none;
-    transition: transform 0.3s ease-out;
-  }
-
-  @media (min-width: 900px) {
-    .room-chat {
-      position: static;
-      display: none;
-      padding: 0.5rem 0;
-      transform: none;
-    }
-
-    .room-chat.open {
-      display: flex;
-    }
-  }
-
-  .room-chat-close {
-    max-width: max-content;
-    margin-left: auto;
-  }
-
-  @media (min-width: 900px) {
-    .room-chat-close {
-      display: none;
-    }
-  }
-
   .noroom {
     text-align: center;
     white-space: nowrap;
@@ -115,46 +72,29 @@
     max-width: calc(100vw - 16px);
     transform: translateX(-50%);
   }
-
-  .toast-wrap {
-    margin-bottom: 2px;
-    text-align: center;
-  }
 </style>
 
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { scale } from 'svelte/transition'
   import { Link, navigate } from 'svelte-navigator'
-  import { Button, Input, Label, Modal, ModalBody, Toast, ToastBody } from 'sveltestrap'
+  import { Button, Input, Label, Modal, ModalBody } from 'sveltestrap'
 
   import { EEventRoom, type TUser } from '@dto'
   import type { TRoom } from '@dto'
   import socket from '../lib/ws'
   import { user } from '../store/user'
+  import { unread } from '../store/unread'
   import Chat from '../lib/Chat.svelte'
   import VideoChat from '../lib/VideoChat.svelte'
   import Share from '../lib/Share.svelte'
   import ChatBtn from '../lib/ChatBtn.svelte'
-  import Close from '../lib/Close.svelte'
   import Home from '../lib/Home.svelte'
   import Mic from '../lib/Mic.svelte'
   import Cam from '../lib/Cam.svelte'
   import InitialLayout from '../lib/InitialLayout.svelte';
+  import Toast, { SHARE,  type ToastData } from '../lib/Toast.svelte';
   import { getEscHandler } from '../utils/getEscHandler'
-
-  const SHARE = 'share'
-
-  type TToast =
-    | {
-        id: number
-        type: EEventRoom.userLeaved | EEventRoom.userJoined
-        name: TUser['name']
-      }
-    | {
-        id: number
-        type: typeof SHARE
-      }
 
   export let roomId: TRoom['id']
   let initialLoad = true
@@ -162,7 +102,7 @@
   let modalOpen = true
   let chatOpen = false
   let name = ''
-  let toasts: TToast[] = []
+  let toasts: ToastData[] = []
   let toastId = 0
   let toastTimeouts: ReturnType<typeof setTimeout>[] = []
   let micActive = true
@@ -208,7 +148,7 @@
     }
   }
 
-  function addToast(newToast: TToast) {
+  function addToast(newToast: ToastData) {
     toasts = [...toasts, newToast]
     const timeout = setTimeout(() => {
       toasts = toasts.filter((toast) => toast !== newToast)
@@ -288,32 +228,15 @@
             <Cam active={camActive} on:click={handleCam} />
           </div>
           <div class="room-control-wrap room-control-right">
-            <ChatBtn count={33} on:click={handleChatToggle}/>
+            <ChatBtn count={$unread.length} on:click={handleChatToggle}/>
           </div>
         </div>
       </div>
-      <div class="room-chat bg-white {chatOpen ? 'open' : ''}">
-        <div class="room-chat-close">
-          <Close on:click={handleChatToggle} />
-        </div>
-        <Chat />
-      </div>
+      <Chat open={chatOpen} on:close={handleChatToggle}/>
     </div>
     <div class="toast-list">
       {#each toasts as toast (toast.id)}
-        <div transition:scale={{ opacity: 0, start: 0.7 }} class="toast-wrap">
-          <Toast>
-            <ToastBody>
-              {#if toast.type === EEventRoom.userJoined}
-                Say hi to <b>{toast.name}</b> 👋
-              {:else if toast.type === EEventRoom.userLeaved}
-                Bye <b>{toast.name}</b> 🤙
-              {:else if toast.type === 'share'}
-                Link copied to clipboard
-              {/if}
-            </ToastBody>
-          </Toast>
-        </div>
+        <Toast data={toast} />
       {/each}
     </div>
   {/if}
