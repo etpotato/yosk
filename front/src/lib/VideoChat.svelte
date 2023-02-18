@@ -3,11 +3,10 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 0.25rem;
-    max-height: calc((var(--vh, 1vh) * 100) - 54px);
+    max-height: calc((var(--vh, 1vh) * 100) - 46px);
     margin: 0;
     margin-bottom: auto;
-    padding: 0;
-    padding-bottom: 0.5rem;
+    padding: 0.5rem 0;
     list-style: none;
     overflow: auto;
     -ms-overflow-style: none;
@@ -30,7 +29,7 @@
       margin: auto 0;
     }
   }
-  
+
   .grid::-webkit-scrollbar {
     display: none;
   }
@@ -121,8 +120,12 @@
   let userUnsuscribe: Unsubscriber
 
   $: {
-    handleMic()
-    handleCam()
+    myVideo?.getAudioTracks().forEach((track) => {
+      track.enabled = micActive
+    })
+    myVideo?.getVideoTracks().forEach((track) => {
+      track.enabled = camActive
+    })
   }
 
   async function getInitialMedia() {
@@ -192,18 +195,6 @@
   function handleReload(evt: Event) {
     evt.preventDefault()
     errorModalOpen = false
-  }
-
-  function handleMic() {
-    myVideo?.getAudioTracks().forEach((track) => {
-      track.enabled = micActive
-    })
-  }
-
-  function handleCam() {
-    myVideo?.getVideoTracks().forEach((track) => {
-      track.enabled = camActive
-    })
   }
 
   onMount(async () => {
