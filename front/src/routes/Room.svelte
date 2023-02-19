@@ -1,82 +1,5 @@
-<style>
-  .room {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
-  }
-
-  @media (min-width: 900px) {
-    .room {
-      flex-direction: row;
-      gap: 0.5rem;
-    }
-  }
-
-  .room-video {
-    flex: 1 0 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    padding-bottom: 0.5rem;
-  }
-
-  @media (min-width: 900px) {
-    .room-video {
-      flex: 1 0 auto;
-    }
-  }
-
-  .room-controls {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    justify-items: center;
-    grid-gap: 0.25rem;
-    isolation: isolate;
-  }
-
-  .room-controls::before {
-    content: '';
-    position: absolute;
-    top: -0.6rem;
-    right: -0.5rem;
-    left: -0.5rem;
-    height: 0.7rem;
-    background-image: linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,1) 90%, rgba(255,255,255,1));
-  }
-
-  .room-control-wrap {
-    position: relative;
-    display: flex;
-    gap: 0.25rem;
-  }
-
-  .room-control-left {
-    justify-self: start;
-  }
-
-  .room-control-right {
-    justify-self: end;
-  }
-
-  .noroom {
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .toast-list {
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    max-width: calc(100vw - 16px);
-    transform: translateX(-50%);
-  }
-</style>
-
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { scale } from 'svelte/transition'
   import { Link, navigate } from 'svelte-navigator'
   import { Button, Input, Label, Modal, ModalBody } from 'sveltestrap'
 
@@ -84,7 +7,6 @@
   import type { TRoom } from '@dto'
   import socket from '../lib/ws'
   import { user } from '../store/user'
-  import { unread } from '../store/unread'
   import Chat from '../lib/Chat.svelte'
   import VideoChat from '../lib/VideoChat.svelte'
   import Share from '../lib/Share.svelte'
@@ -229,7 +151,7 @@
             <Cam active={camActive} on:click={handleCam} />
           </div>
           <div class="room-control-wrap room-control-right">
-            <ChatBtn on:click={handleChatToggle}/>
+            <ChatBtn showCount={!chatOpen} on:click={handleChatToggle}/>
           </div>
         </div>
       </div>
@@ -242,3 +164,79 @@
     </div>
   {/if}
 {/if}
+
+<style>
+  .room {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+
+  @media (min-width: 900px) {
+    .room {
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+  }
+
+  .room-video {
+    flex: 1 0 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    padding-bottom: 0.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .room-video {
+      flex: 1 0 auto;
+    }
+  }
+
+  .room-controls {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    grid-gap: 0.25rem;
+    isolation: isolate;
+  }
+
+  .room-controls::before {
+    content: '';
+    position: absolute;
+    top: -0.6rem;
+    right: -0.5rem;
+    left: -0.5rem;
+    height: 0.7rem;
+    background-image: linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,1) 90%, rgba(255,255,255,1));
+  }
+
+  .room-control-wrap {
+    position: relative;
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .room-control-left {
+    justify-self: start;
+  }
+
+  .room-control-right {
+    justify-self: end;
+  }
+
+  .noroom {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .toast-list {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    max-width: calc(100vw - 16px);
+    transform: translateX(-50%);
+  }
+</style>

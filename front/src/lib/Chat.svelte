@@ -4,7 +4,7 @@
   import ChatForm from './ChatForm.svelte'
   import Close from '../lib/Close.svelte'
 
-  export let open = false
+  export let open: boolean
 
 	const dispatch = createEventDispatcher();
   function handleClose(evt: Event) {
@@ -24,7 +24,7 @@
     <Close on:click={handleClose} />
   </div>
   <div class="d-flex flex-column">
-    <MessageList />
+    <MessageList {open} />
     <ChatForm />
   </div>
 </div>

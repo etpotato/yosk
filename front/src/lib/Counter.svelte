@@ -1,7 +1,7 @@
 <style>
   .counter {
     display: block;
-    min-width: 20px;
+    min-width: 1.8em;
     padding: 0.3em;
     font-size: 0.5em;
     font-weight: 600;

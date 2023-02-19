@@ -10,6 +10,7 @@
   
   export let message: TMessageRes
   export let my: boolean
+  export let visible: boolean
 
   let messageRef: HTMLLIElement
   
@@ -60,7 +61,7 @@
       />
     </div>
     <div
-      class="msg-wrap rounded small bg-body border border-1"
+      class="msg-wrap rounded small border border-1 {visible ? 'bg-body' : 'bg-primary bg-opacity-10'}"
     >
       <p class="fw-bold mb-1 msg-name">{message.author.name}</p>
       <p class="msg-text">{@html message.text}</p>
@@ -114,6 +115,7 @@
   .msg-wrap {
     padding: 0.5em 0.7em;
     grid-column: span 2;
+    transition: 0.5s background-color ease-out
   }
 
   .my.msg-wrap {

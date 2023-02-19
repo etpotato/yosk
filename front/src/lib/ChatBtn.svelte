@@ -24,6 +24,8 @@
 <script lang="ts">
   import { Button } from 'sveltestrap'
   import Counter from './Counter.svelte'
+
+  export let showCount: boolean
 </script>
 
 <Button on:click color="dark" type="submit" class="ms-auto position-relative" outline size="lg">
@@ -31,7 +33,9 @@
     <path stroke="currentColor" stroke-width="2" d="M12 21a9 9 0 1 0-7.403-3.88c.105.15.126.345.048.512l-1.218 2.62a.5.5 0 0 0 .435.748H12Z"/>
     <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M9 14h6M9 10h2"/>
   </svg>
-  <span class="count">
-    <Counter /> 
-  </span> 
+  {#if showCount}
+    <span class="count">
+      <Counter /> 
+    </span>
+  {/if} 
 </Button>
