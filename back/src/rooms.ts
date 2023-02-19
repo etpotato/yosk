@@ -70,7 +70,7 @@ class Rooms {
       const room = this.rooms.get(roomId)
 
       if (!room) {
-        console.log(`user ${id} not found`)
+        console.log(`room ${id} not found`)
         return false
       }
 
