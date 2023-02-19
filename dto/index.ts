@@ -51,6 +51,7 @@ export type TRoom = {
   id: string
   users: Map<TUser['id'], TUser>
   messages: TMessageRes[]
+  timeout?: ReturnType<typeof setTimeout>
 }
 
 export type TServerToClientEvents = {
@@ -63,7 +64,7 @@ export type TServerToClientEvents = {
 export type TClientToServerEvents = {
   [EEventRoom.create]: (callback: (roomId: TRoom['id']) => void) => void
   [EEventRoom.check]: (roomId: TRoom['id'], callback: (check: boolean) => void) => void
-  [EEventRoom.join]: ({ roomId, name }: {roomId: TRoom['id'], name: TUser['name']}, callback: (user: TUser) => void) => void
+  [EEventRoom.join]: ({ roomId, name }: {roomId: TRoom['id'], name: TUser['name']}, callback: (user: TUser | null) => void) => void
   [EEventRoom.leave]: () => void
   [EEventMsg.sent]: (msg: TMessageReq) => void
 }

@@ -71,7 +71,7 @@
 
 <ul class="msg-list flex-grow-1 mb-1 bg-primary bg-opacity-10 rounded p-2 border" bind:this={chatList}>
   {#each messages as message (message.id)}
-    <Message 
+    <Message
       {message} 
       my={message.type === EMsgType.user && message.author.id === $user?.id}
       on:mounted={handleMsgMounted}

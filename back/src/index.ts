@@ -48,6 +48,11 @@ io.on('connection', (socket) => {
   socket.on(EEventRoom.join, ({ roomId, name }, ackFn) => {
     console.log('user', socket.id, 'wants to join room', roomId)
 
+    if (!rooms.has(roomId)) {
+      ackFn(null)
+      return
+    }
+
     const user = new User({
       id: socket.id,
       name: name || createName(),
@@ -77,18 +82,16 @@ io.on('connection', (socket) => {
 
     if (!roomId) return
 
+    console.log('user', user.id, `"${user.name}"`, 'leaved room', roomId)
     const message = createInfoMessage({ user, action: EEventRoom.userLeaved })
     rooms.addMessage({ message, roomId })
     rooms.deleteUser({ id: socket.id, roomId })
-
     if (rooms.has(roomId)) {
       rooms.getUsers(roomId).forEach((neighbor) => {
         io.to(neighbor.id).emit(EEventMsg.new, message)
         io.to(neighbor.id).emit(EEventRoom.userLeaved, user)
       })
     }
-
-    console.log('user', user.id, `"${user.name}"`, 'leaved room', roomId)
   })
 
   socket.on(EEventMsg.sent, (msg) => {
@@ -100,11 +103,8 @@ io.on('connection', (socket) => {
     }
 
     const message = createUserMessage({ text: msg, user })
-
     rooms.addMessage({ message, roomId })
-
     const neighbors = rooms.getUsers(roomId)
-
     neighbors.forEach((neighbor) => {
       io.to(neighbor.id).emit(EEventMsg.new, message)
     })
@@ -116,8 +116,8 @@ io.on('connection', (socket) => {
 
     if (!user || !roomId) return
 
+    console.log('user', user.id, `"${user.name}"`, 'disconnected')
     rooms.deleteUser(user)
-
     if (rooms.has(roomId)) {
       const message = createInfoMessage({ user, action: EEventRoom.userLeaved })
       rooms.addMessage({ message, roomId })
@@ -127,9 +127,7 @@ io.on('connection', (socket) => {
         io.to(neighbor.id).emit(EEventRoom.userLeaved, user)
       })
     }
-
     users.delete(user.id)
-    console.log('user', user.id, `"${user.name}"`, 'disconnected')
   })
 })
 

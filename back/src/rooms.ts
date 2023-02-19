@@ -1,6 +1,8 @@
 import { TUser, TRoom, TMessageRes } from '@dto'
 import { nanoid } from 'nanoid'
 
+const TIMEOUT = 10 * 60 * 1000
+
 class Room implements TRoom {
   id: string
   users: Map<TUser['id'], TUser>
@@ -46,6 +48,11 @@ class Rooms {
       user.roomId = room.id
       room.users.set(user.id, user)
 
+      if (room?.timeout) {
+        clearTimeout(room.timeout)
+        console.log(`countdown for room ${roomId} is cleared`)
+      }
+
       return true
     } catch (err) {
       console.error(err)
@@ -70,7 +77,11 @@ class Rooms {
       room.users.delete(id)
 
       if (room.users.size === 0) {
-        this.rooms.delete(roomId)
+        console.log(`countdown for room ${roomId} is started`)
+        room.timeout = setTimeout(() => {
+          this.rooms.delete(roomId)
+          console.log(`room ${roomId} is deleted`)
+        }, TIMEOUT)
       }
 
       return true

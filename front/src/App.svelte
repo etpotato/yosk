@@ -18,5 +18,6 @@
     <Route path="room/:roomId" let:params>
       <Room roomId={params.roomId} />
     </Route>
+    <!-- TODO: 404 -->
   </Router>
 </main>

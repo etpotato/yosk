@@ -119,6 +119,7 @@
     evt.preventDefault()
     socket.emit(EEventRoom.join, { roomId, name }, (userInfo) => {
       user.set(userInfo)
+      roomExist = Boolean(userInfo)
     })
     modalOpen = false
   }
