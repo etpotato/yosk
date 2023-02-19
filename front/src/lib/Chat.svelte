@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import MessageList from './MessageList.svelte'
   import ChatForm from './ChatForm.svelte'
   import Close from '../lib/Close.svelte'
@@ -10,6 +10,13 @@
   function handleClose(evt: Event) {
     dispatch('close', evt);
   }
+
+  onMount(async () => {
+    try {
+      const smoothscroll = await import('smoothscroll-polyfill')
+      smoothscroll.polyfill();
+    } catch {}
+  })
 </script>
 
 <div class="chat bg-white" class:open>
