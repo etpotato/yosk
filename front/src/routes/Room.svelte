@@ -229,7 +229,7 @@
             <Cam active={camActive} on:click={handleCam} />
           </div>
           <div class="room-control-wrap room-control-right">
-            <ChatBtn count={$unread.length} on:click={handleChatToggle}/>
+            <ChatBtn on:click={handleChatToggle}/>
           </div>
         </div>
       </div>
