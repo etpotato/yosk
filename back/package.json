@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts,.js",
-    "start": "node ./build/back/src/index.js",
+    "start": "node ./build/back/index.js",
     "build": "rimraf ./build && tsc",
     "dev": "nodemon"
   },
@@ -47,6 +47,7 @@
     "unique-names-generator": "^4.7.1"
   },
   "_moduleAliases": {
-    "@dto": "../dto/index"
+    "@dto": "../dto/index",
+    "__for_deploy__@dto": "./build/dto/index"
   }
 }
