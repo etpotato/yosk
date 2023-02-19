@@ -1,97 +1,3 @@
-<style>
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 0.25rem;
-    max-height: calc((var(--vh, 1vh) * 100) - 46px);
-    margin: auto 0;
-    padding: 0.5rem 0;
-    list-style: none;
-    overflow: auto;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  @media (hover: hover) {
-    .grid {
-      max-height: calc((var(--vh, 1vh) * 100) - 50px);
-    }
-  }
-
-  @media (min-width: 900px) {
-    .grid {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 0.25rem;
-    }
-  }
-
-  .grid::-webkit-scrollbar {
-    display: none;
-  }
-
-  @media (min-width: 900px) {
-    .grid-item {
-      flex: 0 0 min(49%, 35vw);
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .grid-item {
-      flex: 0 0 min(49%, 32vw);
-    }
-  }
-
-  .video-wrap {
-    position: relative;
-    display: grid;
-    place-content: center;
-    padding-top: 100%;
-    overflow: hidden;
-  }
-
-  @media (min-aspect-ratio: 1 / 1) {
-    .video-wrap {
-      padding-top: 56.25%;
-    }
-  }
-
-  .controls {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    align-items: flex-end;
-    gap: 0.25rem;
-    padding: 0.25rem;
-    opacity: 0;
-    transition: 0.2s opacity ease-in-out;
-  }
-
-  .grid-item:hover .controls,
-  .grid-item:focus-within .controls {
-    opacity: 0.8;
-  }
-
-  .name {
-    position: absolute;
-    top: 0.25rem;
-    left: 0.25rem;
-    right: 0.25rem;
-  }
-
-  @media (min-width: 900px) {
-    .name {
-      position: static;
-      margin-left: auto;
-    }
-  }
-</style>
-
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import type { Unsubscriber } from 'svelte/store'
@@ -215,26 +121,12 @@
 <ul class="grid">
   {#if myVideo}
     <li class="grid-item bg-dark rounded">
-      <div class="video-wrap">
-        <Video src={myVideo} mirrored muted />
-        <div class="controls">
-          <div class="name">
-            <UserName name={$user?.name} />
-          </div>
-        </div>
-      </div>
+      <Video src={myVideo} name={$user?.name}  mirrored muted />
     </li>
   {/if}
   {#each matesVideo as mateVideo (mateVideo.mate.id)}
     <li class="grid-item bg-dark rounded">
-      <div class="video-wrap">
-        <Video src={mateVideo.stream} />
-        <div class="controls">
-          <div class="name">
-            <UserName name={mateVideo.mate.name} />
-          </div>
-        </div>
-      </div>
+      <Video src={mateVideo.stream} name={mateVideo.mate.name} />
     </li>
   {/each}
 </ul>
@@ -247,3 +139,61 @@
       >Ok</Button>
   </ModalBody>
 </Modal>
+
+<style>
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.25rem;
+
+    max-height: calc((var(--vh, 1vh) * 100) - 46px);
+    margin: auto 0;
+    padding: 0.5rem 0;
+    list-style: none;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  @media (hover: hover) {
+    .grid {
+      max-height: calc((var(--vh, 1vh) * 100) - 42px);
+    }
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .grid-item {
+    flex: 0 0 calc(50% - 0.125rem);
+  }
+
+  .grid-item:only-child {
+    flex: 0 1 100%;
+  }
+
+  @media (min-aspect-ratio: 1 / 1) {
+    .grid-item:only-child {
+      flex: 0 1 70%;
+    } 
+  }
+
+  @media (min-width: 900px) {
+    .grid-item:only-child {
+      flex: 0 1 60%;
+    }
+
+    .grid-item {
+      flex: 0 0 min(49%, 35vw);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .grid-item {
+      flex: 0 0 min(49%, 32vw);
+    }
+  }
+</style>
