@@ -6,8 +6,8 @@
     font-size: 0.5em;
     font-weight: 600;
     line-height: 1.2;
-    color: var(--bs-white);
-    background-color: var(--bs-primary);
+    /* color: var(--bs-white);
+    background-color: var(--bs-primary); */
     border-radius: 100em;
   }
 </style>
@@ -19,5 +19,5 @@
 </script>
 
 {#if $unread.length > 0}
-  <span class="counter {className}">{$unread.length}</span>
+  <span class="counter bg-primary text-white {className}">{$unread.length}</span>
 {/if}

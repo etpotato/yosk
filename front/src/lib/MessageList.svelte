@@ -149,7 +149,7 @@
 
   .scrolldown {
     position: absolute;
-    right: 0.7rem;
-    bottom: 0.7rem;
+    right: 0.4rem;
+    bottom: 1rem;
   }
 </style>
