@@ -7,13 +7,13 @@
   import { EEventRoom, EMsgType, type TMessageRes } from '@dto'
   import { getAvatarUrl } from '../utils/getAvatarUrl'
   import { formatTime } from '../utils/formatTime'
-  
+
   export let message: TMessageRes
   export let my: boolean
   export let visible: boolean
 
   let messageRef: HTMLLIElement
-  
+
   const dispatch = createEventDispatcher<MountedDetail>()
 
   onMount(() => {
@@ -42,7 +42,7 @@
     <div
       class="msg-wrap rounded small my bg-dark text-bg-dark"
     >
-      <p class="fw-bold mb-1 msg-name">{message.author.name} 
+      <p class="fw-bold mb-1 msg-name">{message.author.name}
         <span class="msg-you fw-normal">you</span>
       </p>
       <p class="msg-text">{@html message.text}</p>
@@ -68,7 +68,7 @@
       <p class="msg-time">
         {formatTime(new Date(message.timestamp * 1000))}
       </p>
-    </div>        
+    </div>
   {/if}
 </li>
 
@@ -81,7 +81,7 @@
     margin-bottom: 0.25rem;
   }
 
-  .msg:last-child {
+  .msg:nth-last-child(2) {
     margin-bottom: 0;
   }
 
