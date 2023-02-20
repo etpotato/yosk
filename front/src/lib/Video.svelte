@@ -1,18 +1,28 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import UserName from './UserName.svelte';
+  import Mic from './Mic.svelte';
+  import Cam from './Cam.svelte';
 
   export let muted = false
   export let src: MediaStream | null
   export let mirrored = false
   export let name = ''
+  export let micActive = true
+  export let camActive = true
 
   let videoEl: HTMLVideoElement
+
+  async function playVideo() {
+    try {
+      videoEl?.play()
+    } catch {}
+  }
 
   onMount(() => {
     if (src) {
       videoEl.srcObject = src
-      document.addEventListener('click', () => videoEl?.play(), { once: true })
+      document.addEventListener('click', playVideo, { once: true })
     }
   })
 </script>
@@ -20,6 +30,12 @@
 <div class="video-wrap">
   <video bind:this={videoEl} {muted} class:mirrored class="video rounded" autoplay playsinline/>
   <div class="controls">
+    {#if !micActive}
+      <Mic active={micActive} disabled/>
+    {/if}
+    {#if !camActive}
+      <Cam active={camActive} disabled/>
+    {/if}
     <div class="name">
       <UserName {name} />
     </div>
@@ -71,13 +87,8 @@
     align-items: flex-end;
     gap: 0.25rem;
     padding: 0.25rem;
-    opacity: 0;
-    transition: 0.2s opacity ease-in-out;
-  }
-
-  .video-wrap:hover .controls,
-  .video-wrap:focus-within .controls {
-    opacity: 0.8;
+    user-select: none;
+    pointer-events: none;
   }
 
   .name {
@@ -85,6 +96,13 @@
     top: 0.25rem;
     left: 0.25rem;
     right: 0.25rem;
+    opacity: 0;
+    transition: 0.2s opacity ease-in-out;
+  }
+
+  .video-wrap:hover .name,
+  .video-wrap:focus-within .name {
+    opacity: 0.8;
   }
 
   @media (min-width: 900px) {

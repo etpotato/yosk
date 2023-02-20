@@ -18,9 +18,10 @@
   import { Button } from 'sveltestrap'
 
   export let active: boolean
+  export let disabled = false
 </script>
 
-<Button on:click color="dark" type="button" size="lg">
+<Button on:click class="{disabled ? 'opacity-100' : ''}" color="dark" type="button" size="lg" {disabled}>
   {#if active}
     <svg viewBox="0 0 24 24" fill="none" class="mic">
       <path

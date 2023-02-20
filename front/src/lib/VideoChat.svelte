@@ -8,10 +8,17 @@
   import { user } from '../store/user'
   import socket from './ws'
   import Video from './Video.svelte'
-  import UserName from './UserName.svelte'
   import { getMedia } from '../utils/getMedia'
 
-  type MateVideo = { mate: TUser; stream: MediaStream }
+  type VideoInfo = {
+    micActive?: boolean;
+    camActive?: boolean;
+  }
+
+  type MateVideo = {
+    mate: TUser;
+    stream: MediaStream;
+  } & VideoInfo
 
   export let micActive = true
   export let camActive = true
@@ -30,6 +37,9 @@
     myVideo?.getVideoTracks().forEach((track) => {
       track.enabled = camActive
     })
+    peerCons.forEach((conn) => {
+      conn.send({ micActive, camActive })
+    })
   }
 
   async function getInitialMedia() {
@@ -40,6 +50,15 @@
     }
 
     myVideo = getMediaResult.stream
+  }
+
+  function handleVideoInfo(data: VideoInfo, peer: string) {
+    matesVideo = matesVideo.map((mateVideo) => {
+      if (mateVideo.mate.id === peer) {
+        return { ...mateVideo, micActive: data.micActive, camActive: data.camActive }
+      }
+      return mateVideo
+    })
   }
 
   function createMyPeer(user: TUser | null) {
@@ -53,8 +72,8 @@
     // mates will connect
     myPeer.on('connection', (conn) => {
       peerCons.push(conn)
-      conn.on('data', (data) => console.log(data))
-      conn.on('open', () => conn.send('hi from new user!'))
+      conn.on('open', () => conn.send({ micActive, camActive }))
+      conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
     })
     // mates will call
     myPeer.on('call', async (call) => {
@@ -76,8 +95,8 @@
     if (!conn) return
 
     peerCons.push(conn)
-    conn.on('open', () => conn.send('hi from existing mate'))
-    conn.on('data', (data) => console.log(data))
+    conn.on('open', () => conn.send({ micActive, camActive }))
+    conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
     // I'm calling new mate with my video stream
     const myStream = myVideo
     if (!myStream) return
@@ -92,8 +111,8 @@
     matesVideo = matesVideo.filter((item) => item.mate?.id !== mate.id)
   }
 
-  function showVideo({ mate, stream }: MateVideo) {
-    matesVideo = [...matesVideo, { mate, stream }]
+  function showVideo(video: MateVideo) {
+    matesVideo = [...matesVideo, video]
   }
 
   function handleReload(evt: Event) {
@@ -121,12 +140,12 @@
 <ul class="grid">
   {#if myVideo}
     <li class="grid-item bg-dark rounded">
-      <Video src={myVideo} name={$user?.name}  mirrored muted />
+      <Video src={myVideo} name={$user?.name} {micActive} {camActive} mirrored muted />
     </li>
   {/if}
   {#each matesVideo as mateVideo (mateVideo.mate.id)}
     <li class="grid-item bg-dark rounded">
-      <Video src={mateVideo.stream} name={mateVideo.mate.name} />
+      <Video src={mateVideo.stream} name={mateVideo.mate.name} micActive={mateVideo.micActive} camActive={mateVideo.camActive}/>
     </li>
   {/each}
 </ul>
@@ -178,7 +197,7 @@
   @media (min-aspect-ratio: 1 / 1) {
     .grid-item:only-child {
       flex: 0 1 70%;
-    } 
+    }
   }
 
   @media (min-width: 900px) {
