@@ -1,13 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import UserName from './UserName.svelte';
-  import Mic from './Mic.svelte';
-  import Cam from './Cam.svelte';
+  import VideoControl from './VideoControl.svelte'
 
-  export let muted = false
   export let src: MediaStream | null
-  export let mirrored = false
   export let name = ''
+  export let mine = false
   export let micActive = true
   export let camActive = true
 
@@ -28,16 +26,19 @@
 </script>
 
 <div class="video-wrap">
-  <video bind:this={videoEl} {muted} class:mirrored class="video rounded" autoplay playsinline/>
+  <video bind:this={videoEl} muted={mine} class:mirrored={mine} class="video rounded" autoplay playsinline/>
   <div class="controls">
     {#if !micActive}
-      <Mic active={micActive} disabled/>
+      <VideoControl type="mic" active={micActive} size="sm" info disabled/>
     {/if}
     {#if !camActive}
-      <Cam active={camActive} disabled/>
+      <VideoControl type="cam" active={camActive} size="sm" info disabled/>
     {/if}
-    <div class="name">
+    <div class="name rounded-top bg-dark bg-opacity-50">
       <UserName {name} />
+      {#if mine}
+        <UserName name="you" mine/>
+      {/if}
     </div>
   </div>
 </div>
@@ -93,22 +94,17 @@
 
   .name {
     position: absolute;
-    top: 0.25rem;
-    left: 0.25rem;
-    right: 0.25rem;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    padding: 0.25rem;
     opacity: 0;
     transition: 0.2s opacity ease-in-out;
   }
 
   .video-wrap:hover .name,
   .video-wrap:focus-within .name {
-    opacity: 0.8;
-  }
-
-  @media (min-width: 900px) {
-    .name {
-      position: static;
-      margin-left: auto;
-    }
+    opacity: 1;
   }
 </style>

@@ -12,8 +12,7 @@
   import Share from '../lib/Share.svelte'
   import ChatBtn from '../lib/ChatBtn.svelte'
   import Home from '../lib/Home.svelte'
-  import Mic from '../lib/Mic.svelte'
-  import Cam from '../lib/Cam.svelte'
+  import VideoControl from '../lib/VideoControl.svelte'
   import InitialLayout from '../lib/InitialLayout.svelte';
   import Toast, { SHARE,  type ToastData } from '../lib/Toast.svelte';
   import { getEscHandler } from '../utils/getEscHandler'
@@ -147,8 +146,8 @@
             <Share on:click={handleShare} />
           </div>
           <div class="room-control-wrap">
-            <Mic active={micActive} on:click={handleMic} />
-            <Cam active={camActive} on:click={handleCam} />
+            <VideoControl type="mic" active={micActive} on:click={handleMic} />
+            <VideoControl type="cam" active={camActive} on:click={handleCam} />
           </div>
           <div class="room-control-wrap room-control-right">
             <ChatBtn showCount={!chatOpen} on:click={handleChatToggle}/>

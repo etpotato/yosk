@@ -140,7 +140,7 @@
 <ul class="grid">
   {#if myVideo}
     <li class="grid-item bg-dark rounded">
-      <Video src={myVideo} name={$user?.name} {micActive} {camActive} mirrored muted />
+      <Video src={myVideo} name={$user?.name} {micActive} {camActive} mine />
     </li>
   {/if}
   {#each matesVideo as mateVideo (mateVideo.mate.id)}
