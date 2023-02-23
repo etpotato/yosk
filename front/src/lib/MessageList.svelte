@@ -1,7 +1,7 @@
 <script lang="ts">
   import Autolinker from 'autolinker'
   import { onDestroy, onMount, tick } from 'svelte'
-  import { fade } from 'svelte/transition'
+  import { scale, fade } from 'svelte/transition'
   import { EEventMsg, EMsgType, type TMessageRes } from '@dto'
   import Message, { type MountedDetail } from './Message.svelte'
   import Scrolldown from './Scrolldown.svelte'
@@ -113,7 +113,7 @@
     <li bind:this={bottom}></li>
   </ul>
   {#if $unread.length > 0}
-    <div transition:fade={{ duration: 200 }} class="scrolldown">
+    <div transition:scale={{ opacity: 0, duration: 200, start: 0.5 }} class="scrolldown">
       <Scrolldown on:click={handleScrollDown}/>  
     </div>
   {/if}

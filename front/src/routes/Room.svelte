@@ -150,7 +150,7 @@
             <VideoControl type="cam" active={camActive} on:click={handleCam} />
           </div>
           <div class="room-control-wrap room-control-right">
-            <ChatBtn showCount={!chatOpen} on:click={handleChatToggle}/>
+            <ChatBtn {chatOpen} on:click={handleChatToggle}/>
           </div>
         </div>
       </div>

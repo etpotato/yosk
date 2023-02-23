@@ -8,8 +8,7 @@
   <span class="background bg-body rounded rounded-pill"></span>
   <Button on:click class="d-block position-relative rounded rounded-pill bg-body text-dark border-dark border-opacity-50" color="dark" type="button" size="lg" outline>
     <svg class="icon" fill="none" viewBox="0 0 24 24">
-      <rect width="18" height="18" x="3" y="3" stroke="currentColor" stroke-width="2" rx="4"/>
-      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m0 0 4-4m-4 4-4-4"/>
+      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18m0 0-7 7m7-7-7-7"/>
     </svg>
     <span class="count">
       <Counter />
@@ -30,6 +29,7 @@
     display: block;
     width: 1em;
     height: 1em;
+    transform: rotate(90deg);
   }
 
   @media (hover: hover) {
