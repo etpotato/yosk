@@ -11,7 +11,7 @@
   import VideoChat from '../lib/VideoChat.svelte'
   import Share from '../lib/Share.svelte'
   import ChatBtn from '../lib/ChatBtn.svelte'
-  import Home from '../lib/Home.svelte'
+  import EndCall from '../lib/EndCall.svelte'
   import VideoControl from '../lib/VideoControl.svelte'
   import InitialLayout from '../lib/InitialLayout.svelte';
   import Toast, { SHARE,  type ToastData } from '../lib/Toast.svelte';
@@ -142,7 +142,7 @@
         <VideoChat {micActive} {camActive}/>
         <div class="room-controls">
           <div class="room-control-wrap room-control-left">
-            <Home on:click={() => navigate('/')} />
+            <EndCall on:click={() => navigate('/')} />
             <Share on:click={handleShare} />
           </div>
           <div class="room-control-wrap">
