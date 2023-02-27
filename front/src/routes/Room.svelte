@@ -18,6 +18,9 @@
   import { getEscHandler } from '../utils/getEscHandler'
 
   export let roomId: TRoom['id']
+
+  const LOCAL_NAME = 'yosk_name'
+
   let initialLoad = true
   let roomExist = true
   let modalOpen = true
@@ -42,6 +45,7 @@
       user.set(userInfo)
       roomExist = Boolean(userInfo)
     })
+    window.localStorage.setItem(LOCAL_NAME, name)
     modalOpen = false
   }
 
@@ -92,6 +96,7 @@
   }
 
   onMount(() => {
+    name = window.localStorage.getItem(LOCAL_NAME) || ''
     checkRoom(roomId)
     socket.on(EEventRoom.userJoined, handleMateJoined)
     socket.on(EEventRoom.userLeaved, handleMateLeaved)
