@@ -238,7 +238,7 @@
 
   .toast-list {
     position: absolute;
-    top: 8px;
+    top: 48px;
     left: 50%;
     max-width: calc(100vw - 16px);
     transform: translateX(-50%);

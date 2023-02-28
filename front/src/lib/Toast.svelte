@@ -22,18 +22,17 @@
 </script>
 
 <div transition:scale={{ opacity: 0, start: 0.7 }} class="toast-wrap">
-
-<Toast>
-  <ToastBody>
-    {#if data.type === EEventRoom.userJoined}
-      Say hi to <b>{data.name}</b> 👋
-    {:else if data.type === EEventRoom.userLeaved}
-      Bye <b>{data.name}</b> 🤙
-    {:else if data.type === SHARE}
-      Link copied to clipboard
-    {/if}
-  </ToastBody>
-</Toast>
+  <Toast>
+    <ToastBody>
+      {#if data.type === EEventRoom.userJoined}
+        Say hi to <b>{data.name}</b> 👋
+      {:else if data.type === EEventRoom.userLeaved}
+        Bye <b>{data.name}</b> 🤙
+      {:else if data.type === SHARE}
+        Link copied to clipboard
+      {/if}
+    </ToastBody>
+  </Toast>
 </div>
 
 <style>
