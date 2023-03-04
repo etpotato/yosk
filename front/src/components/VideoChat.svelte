@@ -2,31 +2,20 @@
   import { onMount, onDestroy } from 'svelte'
   import type { Unsubscriber } from 'svelte/store'
   import { Button, Modal, ModalBody } from 'sveltestrap'
-  import { Peer } from 'peerjs'
-  import type { DataConnection } from 'peerjs'
   import { EEventRoom, type TUser } from '@dto'
   import { user } from '../store/user'
   import socket from '../lib/ws'
+  import { createMyPeer } from '../lib/peer'
+  import type { TVideo, MateVideo, GetVideoInfo, HandleVideoInfo, HandleMateLeaved, HandleMatesVideo, GetVideo } from '../lib/peer'
   import Video from './Video.svelte'
   import { getMedia } from '../utils/getMedia'
-
-  type VideoInfo = {
-    micActive?: boolean;
-    camActive?: boolean;
-  }
-
-  type MateVideo = {
-    mate: TUser;
-    stream: MediaStream;
-  } & VideoInfo
 
   export let micActive = true
   export let camActive = true
 
-  let myPeer: Peer | null = null
-  let peerCons: DataConnection[] = []
+  let myPeer: ReturnType<typeof createMyPeer> | null = null
   let errorModalOpen = false
-  let myVideo: MediaStream | null = null
+  let myVideo: TVideo = null
   let matesVideo: MateVideo[] = []
   let userUnsuscribe: Unsubscriber
 
@@ -37,9 +26,7 @@
     myVideo?.getVideoTracks().forEach((track) => {
       track.enabled = camActive
     })
-    peerCons.forEach((conn) => {
-      conn.send({ micActive, camActive })
-    })
+    myPeer?.handleVideoInfoChange({ micActive, camActive })
   }
 
   async function getInitialMedia() {
@@ -52,94 +39,25 @@
     myVideo = getMediaResult.stream
   }
 
-  function handleVideoInfo(data: VideoInfo, peer: string) {
+  const getVideo: GetVideo = () => myVideo
+
+  const getVideoInfo: GetVideoInfo = () => ({ micActive, camActive })
+
+  const handleVideoInfo: HandleVideoInfo = ({ info, mateId }) => {
     matesVideo = matesVideo.map((mateVideo) => {
-      if (mateVideo.mate.id === peer) {
-        return { ...mateVideo, micActive: data.micActive, camActive: data.camActive }
+      if (mateVideo.mate.id === mateId) {
+        return { ...mateVideo, micActive: info.micActive, camActive: info.camActive }
       }
       return mateVideo
     })
   }
 
-  function createMyPeer(user: TUser | null) {
-    if (!user) {
-      myPeer?.destroy()
-      myPeer = null
-      return
-    }
-    // I'm joining the room, mates are getting my info
-    myPeer = new Peer(user.id)
-    // mates will connect
-    myPeer.on('connection', (conn) => {
-      peerCons.push(conn)
-      conn.on('open', () => conn.send({ micActive, camActive }))
-      conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
-      conn.on('error', (error) => {
-        console.log('conn error')
-        console.log(error)
-      })
-    })
-    // mates will call
-    myPeer.on('call', async (call) => {
-      const myStream = myVideo || undefined
-      call.answer(myStream)
-      const mate = call.metadata.user as TUser
-      call.once('stream', (stream) => {
-        showVideo({ mate, stream })
-      })
-      call.on('close', () => handleMateLeaved(mate))
-      call.on('error', (error) => {
-        console.log('call err')
-        console.log(error)
-      })
-    })
-
-    myPeer.on('error', (error) => {
-      console.log('myPeer error')
-      console.log(error)
-    })
-  }
-
-  async function handleMateJoined(mate: TUser) {
-    // new mate joined the room
-    if (!myPeer || !mate.id) return
-    // I'm setting up peer connection with new mate
-    const conn = myPeer.connect(mate.id)
-    if (!conn) return
-
-    peerCons.push(conn)
-    conn.on('open', () => conn.send({ micActive, camActive }))
-    conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
-    conn.on('close', () => handleMateLeaved(mate))
-    conn.on('error', (error) => {
-      console.log('conn error')
-      console.log(error)
-    })
-
-    // I'm calling new mate with my video stream
-    const myStream = myVideo
-    if (!myStream) return
-    const call = myPeer.call(mate.id, myStream, { metadata: { user: $user } })
-    call.once('stream', (stream) => showVideo({ mate, stream }))
-    
-    call.on('error', (error) => {
-      console.log('call err')
-      console.log(error)
-    })
-
-    myPeer.on('error', (error) => {
-      console.log('myPeer error')
-      console.log(error)
-    })
-  }
-
-  function handleMateLeaved(mate: TUser) {
+  const handleMateLeaved: HandleMateLeaved = (mateId) => {
     // do we need to close this peer connection?
-    if (!mate?.id) return
-    matesVideo = matesVideo.filter((item) => item.mate?.id !== mate.id)
+    matesVideo = matesVideo.filter((item) => item.mate?.id !== mateId)
   }
 
-  function showVideo(video: MateVideo) {
+  const handleMatesVideo: HandleMatesVideo = (video) => {
     matesVideo = [...matesVideo, video]
   }
 
@@ -148,19 +66,29 @@
     errorModalOpen = false
   }
 
+  function createPeer(user: TUser | null) {
+    myPeer = createMyPeer({ 
+      user,
+      getVideoInfo,
+      getVideo,
+      handleVideoInfo,
+      handleMatesVideo,
+      handleMateLeaved,
+    })
+  }
+
   onMount(async () => {
     await getInitialMedia()
-    userUnsuscribe = user.subscribe(createMyPeer)
-    socket.on(EEventRoom.userJoined, handleMateJoined)
-    socket.on(EEventRoom.userLeaved, handleMateLeaved)
+    userUnsuscribe = user.subscribe(createPeer)
+    socket.on(EEventRoom.userJoined, myPeer?.handleMateJoined)
+    socket.on(EEventRoom.userLeaved, (mate) => handleMateLeaved(mate.id))
   })
 
   onDestroy(() => {
     userUnsuscribe?.()
     myPeer?.destroy()
-    socket.off(EEventRoom.userJoined, handleMateJoined)
-    socket.off(EEventRoom.userLeaved, handleMateLeaved)
-
+    socket.off(EEventRoom.userJoined, myPeer?.handleMateJoined)
+    socket.off(EEventRoom.userLeaved, (mate) => handleMateLeaved(mate.id))
     myVideo?.getTracks().forEach((track) => track.stop())
   })
 </script>

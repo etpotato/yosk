@@ -55,7 +55,7 @@ export type TRoom = {
 }
 
 export type TServerToClientEvents = {
-  [EEventRoom.userJoined]: (user: TUser) => void
+  [EEventRoom.userJoined]?: (user: TUser) => void
   [EEventRoom.userLeaved]: (user: TUser) => void
   [EEventMsg.new]: (msg: TMessageRes) => void
   [EEventMsg.all]: (allMsg: TMessageRes[]) => void
