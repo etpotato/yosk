@@ -1,4 +1,8 @@
 const DENIED = 'Permission denied'
+const RESOLUTION = {
+  width: 848,
+  height: 480,
+}
 
 export async function getMedia({
   micActive,
@@ -15,8 +19,7 @@ export async function getMedia({
       audio: true,
       video: {
         facingMode: 'user',
-        width: 1280,
-        height: 720,
+        ...RESOLUTION,
       },
     })
 
@@ -38,8 +41,7 @@ export async function getMedia({
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: 'user',
-        width: 1280,
-        height: 720,
+        ...RESOLUTION,
       },
     })
 
