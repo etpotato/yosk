@@ -12,6 +12,7 @@
     <span class="wrap">{name}</span>
   </Button>
 {/if}
+
 <style>
   .wrap {
     word-break: break-word; 

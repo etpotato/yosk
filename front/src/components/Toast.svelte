@@ -18,7 +18,6 @@
   import { EEventRoom, type TUser } from '@dto'
 
   export let data: ToastData
-
 </script>
 
 <div transition:scale={{ opacity: 0, start: 0.7 }} class="toast-wrap">

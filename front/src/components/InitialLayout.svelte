@@ -1,3 +1,10 @@
+<div class="home">
+  <div class="wrap">
+    <img class="logo" src="/android-chrome-512x512.png" alt="Yosk logo" width="512" height="512">
+    <slot></slot>
+  </div>
+</div>
+
 <style>
   .home {
     position: relative;
@@ -28,10 +35,3 @@
     max-height: calc(var(--vh, 1vh) * 100 - 100px);
   }
 </style>
-
-<div class="home">
-  <div class="wrap">
-    <img class="logo" src="/android-chrome-512x512.png" alt="Yosk logo" width="512" height="512">
-    <slot></slot>
-  </div>
-</div>

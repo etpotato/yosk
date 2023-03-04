@@ -39,7 +39,7 @@
 <script lang="ts">
   import { EEventMsg } from '@dto'
   import type { TMessageReq } from '@dto'
-  import socket from './ws'
+  import socket from '../lib/ws'
   import Send from './Send.svelte'
 
   let textarea: HTMLTextAreaElement

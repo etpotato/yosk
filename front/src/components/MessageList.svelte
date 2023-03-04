@@ -1,11 +1,11 @@
 <script lang="ts">
   import Autolinker from 'autolinker'
   import { onDestroy, onMount, tick } from 'svelte'
-  import { scale, fade } from 'svelte/transition'
+  import { scale } from 'svelte/transition'
   import { EEventMsg, EMsgType, type TMessageRes } from '@dto'
   import Message, { type MountedDetail } from './Message.svelte'
   import Scrolldown from './Scrolldown.svelte'
-  import socket from './ws'
+  import socket from '../lib/ws'
   import { user } from '../store/user'
   import { unread } from '../store/unread'
 

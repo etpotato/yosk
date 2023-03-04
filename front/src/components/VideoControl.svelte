@@ -1,24 +1,4 @@
 <!-- https://www.svgrepo.com/collection/nova-circular-line-icons -->
-<style>
-  .icon {
-    display: block;
-    width: 1em;
-    height: 1em;
-  }
-
-  .fixed-size {
-    width: 1rem;
-    height: 1rem;
-  }
-
-  @media (hover: hover) {
-    .icon {
-      width: 1rem;
-      height: 1rem;
-    }
-  }
-</style>
-
 <script lang="ts">
   import { Button } from 'sveltestrap'
   import type { ButtonProps } from 'sveltestrap/src/Button'
@@ -62,3 +42,23 @@
     {/if}
   {/if}
 </Button>
+
+<style>
+  .icon {
+    display: block;
+    width: 1em;
+    height: 1em;
+  }
+
+  .fixed-size {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (hover: hover) {
+    .icon {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+</style>

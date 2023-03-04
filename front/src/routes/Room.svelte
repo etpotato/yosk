@@ -7,14 +7,14 @@
   import type { TRoom } from '@dto'
   import socket from '../lib/ws'
   import { user } from '../store/user'
-  import Chat from '../lib/Chat.svelte'
-  import VideoChat from '../lib/VideoChat.svelte'
-  import Share from '../lib/Share.svelte'
-  import ChatBtn from '../lib/ChatBtn.svelte'
-  import EndCall from '../lib/EndCall.svelte'
-  import VideoControl from '../lib/VideoControl.svelte'
-  import InitialLayout from '../lib/InitialLayout.svelte';
-  import Toast, { SHARE,  type ToastData } from '../lib/Toast.svelte';
+  import Chat from '../components/Chat.svelte'
+  import VideoChat from '../components/VideoChat.svelte'
+  import Share from '../components/Share.svelte'
+  import ChatBtn from '../components/ChatBtn.svelte'
+  import EndCall from '../components/EndCall.svelte'
+  import VideoControl from '../components/VideoControl.svelte'
+  import InitialLayout from '../components/InitialLayout.svelte';
+  import Toast, { SHARE,  type ToastData } from '../components/Toast.svelte';
   import { getEscHandler } from '../utils/getEscHandler'
 
   export let roomId: TRoom['id']
@@ -238,9 +238,15 @@
 
   .toast-list {
     position: absolute;
-    top: 48px;
+    top: 36px;
     left: 50%;
     max-width: calc(100vw - 16px);
     transform: translateX(-50%);
+  }
+
+  @media (min-width: 900px) {
+    .toast-list {
+      top: 0.5rem;
+    }
   }
 </style>

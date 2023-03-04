@@ -6,7 +6,7 @@
   import type { DataConnection } from 'peerjs'
   import { EEventRoom, type TUser } from '@dto'
   import { user } from '../store/user'
-  import socket from './ws'
+  import socket from '../lib/ws'
   import Video from './Video.svelte'
   import { getMedia } from '../utils/getMedia'
 
@@ -74,6 +74,10 @@
       peerCons.push(conn)
       conn.on('open', () => conn.send({ micActive, camActive }))
       conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
+      conn.on('error', (error) => {
+        console.log('conn error')
+        console.log(error)
+      })
     })
     // mates will call
     myPeer.on('call', async (call) => {
@@ -84,6 +88,15 @@
         showVideo({ mate, stream })
       })
       call.on('close', () => handleMateLeaved(mate))
+      call.on('error', (error) => {
+        console.log('call err')
+        console.log(error)
+      })
+    })
+
+    myPeer.on('error', (error) => {
+      console.log('myPeer error')
+      console.log(error)
     })
   }
 
@@ -97,12 +110,27 @@
     peerCons.push(conn)
     conn.on('open', () => conn.send({ micActive, camActive }))
     conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
+    conn.on('close', () => handleMateLeaved(mate))
+    conn.on('error', (error) => {
+      console.log('conn error')
+      console.log(error)
+    })
+
     // I'm calling new mate with my video stream
     const myStream = myVideo
     if (!myStream) return
     const call = myPeer.call(mate.id, myStream, { metadata: { user: $user } })
     call.once('stream', (stream) => showVideo({ mate, stream }))
-    conn.on('close', () => handleMateLeaved(mate))
+    
+    call.on('error', (error) => {
+      console.log('call err')
+      console.log(error)
+    })
+
+    myPeer.on('error', (error) => {
+      console.log('myPeer error')
+      console.log(error)
+    })
   }
 
   function handleMateLeaved(mate: TUser) {

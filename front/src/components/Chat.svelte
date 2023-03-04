@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte'
   import MessageList from './MessageList.svelte'
   import ChatForm from './ChatForm.svelte'
-  import Close from '../lib/Close.svelte'
+  import Close from './Close.svelte'
 
   export let open: boolean
 

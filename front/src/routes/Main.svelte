@@ -3,7 +3,7 @@
   import { Button } from 'sveltestrap'
   import { EEventRoom } from '@dto'
   import socket from '../lib/ws'
-  import InitialLayout from '../lib/InitialLayout.svelte';
+  import InitialLayout from '../components/InitialLayout.svelte';
 
   const createMeeting = (evt: Event) => {
     evt.preventDefault()
