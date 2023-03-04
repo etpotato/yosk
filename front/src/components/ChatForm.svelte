@@ -1,3 +1,50 @@
+<script lang="ts">
+  import { EEventMsg } from '@dto'
+  import type { TMessageReq } from '@dto'
+  import socket from '../lib/ws'
+  import Send from './Send.svelte'
+
+  let textarea: HTMLTextAreaElement
+  let input: TMessageReq = ''
+
+  const sendMessage = (evt?: Event) => {
+    evt?.preventDefault()
+    const msg = input.trim()
+    if (msg) {
+      socket.emit(EEventMsg.sent, msg)
+      input = ''
+      textarea.style.height = 'auto'
+    }
+    textarea.focus()
+  }
+
+  const handleEnter = (evt: KeyboardEvent) => {
+    if (evt.key === 'Enter') {
+      sendMessage(evt)
+    }
+  }
+
+  function resizeInput() {
+    textarea.style.height = `${textarea.scrollHeight}px`
+  }
+</script>
+
+<form action="/" on:submit={sendMessage} class="chat-form">
+  <textarea
+    class="chat-input form-control form-control-lg"
+    bind:this={textarea}
+    on:input={resizeInput}
+    bind:value={input}
+    on:keydown={handleEnter}
+    placeholder="Enter message"
+    rows={1}
+    autocomplete="off"
+  />
+  <span class="chat-send">
+    <Send active={input.trim().length > 0}/>
+  </span>
+</form>
+
 <style>
   .chat-form {
     position: relative;
@@ -35,51 +82,3 @@
     }
   }
 </style>
-
-<script lang="ts">
-  import { EEventMsg } from '@dto'
-  import type { TMessageReq } from '@dto'
-  import socket from '../lib/ws'
-  import Send from './Send.svelte'
-
-  let textarea: HTMLTextAreaElement
-  let input: TMessageReq = ''
-
-  const sendMessage = (evt?: Event) => {
-    evt?.preventDefault()
-    const msg = input.trim()
-    if (!msg) return
-    socket.emit(EEventMsg.sent, msg)
-    resetInput()
-  }
-
-  const handleEnter = (evt: KeyboardEvent) => {
-    if (evt.key === 'Enter') {
-      sendMessage(evt)
-    }
-  }
-
-  function resizeInput() {
-    textarea.style.height = `${textarea.scrollHeight}px`
-  }
-
-  function resetInput() {
-    input = ''
-    textarea.style.height = 'auto'
-  }
-</script>
-
-<form action="/" on:submit={sendMessage} class="chat-form">
-  <textarea
-    class="chat-input form-control form-control-lg"
-    bind:this={textarea}
-    on:input={resizeInput}
-    bind:value={input}
-    on:keydown={handleEnter}
-    placeholder="Enter message"
-    rows={1}
-  />
-  <span class="chat-send">
-    <Send active={input.length > 0}/>
-  </span>
-</form>
