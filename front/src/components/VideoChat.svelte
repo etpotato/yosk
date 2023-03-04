@@ -14,7 +14,9 @@
   export let camActive = true
 
   let myPeer: ReturnType<typeof createMyPeer> | null = null
-  let errorModalOpen = false
+  let mediaError = false
+  let networkError = false
+  let networkModalOpened = false
   let myVideo: TVideo = null
   let matesVideo: MateVideo[] = []
   let userUnsuscribe: Unsubscriber
@@ -33,7 +35,7 @@
     const getMediaResult = await getMedia({ micActive, camActive })
 
     if (getMediaResult.error) {
-      errorModalOpen = true
+      mediaError = true
     }
 
     myVideo = getMediaResult.stream
@@ -61,9 +63,19 @@
     matesVideo = [...matesVideo, video]
   }
 
-  function handleReload(evt: Event) {
+  function closeMediaModal(evt: Event) {
     evt.preventDefault()
-    errorModalOpen = false
+    mediaError = false
+  }
+
+  function handleNetworkError() {
+    networkError = true
+    networkModalOpened = true
+  }
+
+  function closeNetworkModal(evt: Event) {
+    evt.preventDefault()
+    networkError = false
   }
 
   function createPeer(user: TUser | null) {
@@ -74,6 +86,7 @@
       handleVideoInfo,
       handleMatesVideo,
       handleMateLeaved,
+      handleNetworkError,
     })
   }
 
@@ -93,24 +106,39 @@
   })
 </script>
 
-<ul class="grid">
-  {#if myVideo}
-    <li class="grid-item bg-dark rounded">
-      <Video src={myVideo} name={$user?.name} {micActive} {camActive} mine />
-    </li>
-  {/if}
-  {#each matesVideo as mateVideo (mateVideo.mate.id)}
-    <li class="grid-item bg-dark rounded">
-      <Video src={mateVideo.stream} name={mateVideo.mate.name} micActive={mateVideo.micActive} camActive={mateVideo.camActive}/>
-    </li>
-  {/each}
-</ul>
-<Modal isOpen={errorModalOpen} size="md" centered>
+{#if networkError}
+  <div class="error-wrap">
+    <span class="text-danger fw-bolder">Network error</span>
+  </div>  
+{:else}
+  <ul class="grid">
+    {#if myVideo}
+      <li class="grid-item bg-dark rounded">
+        <Video src={myVideo} name={$user?.name} {micActive} {camActive} mine />
+      </li>
+    {/if}
+    {#each matesVideo as mateVideo (mateVideo.mate.id)}
+      <li class="grid-item bg-dark rounded">
+        <Video src={mateVideo.stream} name={mateVideo.mate.name} micActive={mateVideo.micActive} camActive={mateVideo.camActive}/>
+      </li>
+    {/each}
+  </ul>
+{/if}
+<Modal isOpen={mediaError} size="md" centered>
   <ModalBody class="p-4">
     <p class="text-center">
       There is an&nbsp;error with your media. Please, allow this page to&nbsp;use your&nbsp;camera and&nbsp;microphone in&nbsp;the&nbsp;site settings
     </p>
-    <Button on:click={handleReload} color="dark" outline type="submit" class="d-block w-100" size="lg"
+    <Button on:click={closeMediaModal} color="dark" outline type="submit" class="d-block w-100" size="lg"
+      >Ok</Button>
+  </ModalBody>
+</Modal>
+<Modal isOpen={networkModalOpened} size="md" centered>
+  <ModalBody class="p-4">
+    <p class="text-center">
+      There is an&nbsp;error with your network. Please, try to&nbsp;reload the&nbsp;page
+    </p>
+    <Button on:click={closeNetworkModal} color="dark" outline type="submit" class="d-block w-100" size="lg"
       >Ok</Button>
   </ModalBody>
 </Modal>
@@ -170,5 +198,11 @@
     .grid-item {
       flex: 0 0 min(49%, 32vw);
     }
+  }
+
+  .error-wrap {
+    display: grid;
+    place-content: center;
+    height: 100%;
   }
 </style>
