@@ -30,6 +30,7 @@ let callbacks: {
   handleMatesVideo: HandleMatesVideo
   handleMateLeaved: HandleMateLeaved
 } | null = null
+let retryTimeout: NodeJS.Timeout | null = null
 
 function handleVideoInfoChange(info: VideoInfo) {
   for (const conn of peerCons) {
@@ -40,10 +41,14 @@ function handleVideoInfoChange(info: VideoInfo) {
 function destroy() {
   myPeer?.disconnect()
   myPeer?.destroy()
+  if (retryTimeout) {
+    clearTimeout(retryTimeout)
+  }
   localUser = null
   myPeer = null
   peerCons = []
   callbacks = null
+  retryTimeout = null
 }
 
 function handleMateJoined(mate: TUser): void {
@@ -103,7 +108,8 @@ export function createMyPeer({
 
   myPeer.on('error', (error) => {
     console.log('myPeer error')
-    console.log(error)
+    console.error(error)
+    _handleConnError()
   })
 
   return {
@@ -114,22 +120,51 @@ export function createMyPeer({
 }
 
 function _getCallListeners({ call, mate }: { call: MediaConnection; mate: TUser }) {
-  call.on('stream', (stream) => callbacks?.handleMatesVideo({ mate, stream }))
-  call.on('close', () => callbacks?.handleMateLeaved(mate.id))
+  call.on('stream', (stream) => {
+    callbacks?.handleMatesVideo({ mate, stream })
+  })
+  call.on('close', () => {
+    callbacks?.handleMateLeaved(mate.id)
+  })
   call.on('error', (error) => {
     console.log('call err')
-    console.log(error)
+    console.error(error)
   })
 }
 
 function _getConnListeners({ conn }: { conn: DataConnection }) {
-  conn.on('open', () => conn.send(callbacks?.getVideoInfo()))
+  conn.on('open', () => {
+    conn.send(callbacks?.getVideoInfo())
+  })
   conn.on('data', (info) =>
     callbacks?.handleVideoInfo({ info: info as VideoInfo, mateId: conn.peer }),
   )
-  conn.on('close', () => callbacks?.handleMateLeaved(conn.peer))
+  conn.on('close', () => {
+    callbacks?.handleMateLeaved(conn.peer)
+  })
   conn.on('error', (error) => {
     console.log('conn error')
-    console.log(error)
+    console.error(error)
   })
+}
+
+function _handleConnError() {
+  const TIMEOUT_MILTUPLIER = 2
+  const MAX_RETRIES = 6
+  let retryCount = 1
+  let timeout = 500
+
+  console.log(`Retrying connection in ${timeout / 1000} seconds...`)
+  console.log('Attempting connection retry #' + retryCount)
+
+  if (retryCount < MAX_RETRIES && myPeer) {
+    retryCount++
+    timeout *= TIMEOUT_MILTUPLIER
+    setTimeout(() => {
+      myPeer?.reconnect()
+    }, timeout)
+  } else {
+    console.log('Max retry count reached. Aborting connection.')
+    destroy()
+  }
 }
