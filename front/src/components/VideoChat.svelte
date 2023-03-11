@@ -2,22 +2,31 @@
   import { onMount, onDestroy } from 'svelte'
   import type { Unsubscriber } from 'svelte/store'
   import { Button, Modal, ModalBody } from 'sveltestrap'
+  import { Peer } from 'peerjs'
+  import type { DataConnection } from 'peerjs'
   import { EEventRoom, type TUser } from '@dto'
   import { user } from '../store/user'
   import socket from '../lib/ws'
-  import { createMyPeer } from '../lib/peer'
-  import type { TVideo, MateVideo, GetVideoInfo, HandleVideoInfo, HandleMateLeaved, HandleMatesVideo, GetVideo } from '../lib/peer'
   import Video from './Video.svelte'
   import { getMedia } from '../utils/getMedia'
+
+  type VideoInfo = {
+    micActive?: boolean;
+    camActive?: boolean;
+  }
+
+  type MateVideo = {
+    mate: TUser;
+    stream: MediaStream;
+  } & VideoInfo
 
   export let micActive = true
   export let camActive = true
 
-  let myPeer: ReturnType<typeof createMyPeer> | null = null
-  let mediaError = false
-  let networkError = false
-  let networkModalOpened = false
-  let myVideo: TVideo = null
+  let myPeer: Peer | null = null
+  let peerCons: DataConnection[] = []
+  let errorModalOpen = false
+  let myVideo: MediaStream | null = null
   let matesVideo: MateVideo[] = []
   let userUnsuscribe: Unsubscriber
 
@@ -28,117 +37,165 @@
     myVideo?.getVideoTracks().forEach((track) => {
       track.enabled = camActive
     })
-    myPeer?.handleVideoInfoChange({ micActive, camActive })
+    peerCons.forEach((conn) => {
+      conn.send({ micActive, camActive })
+    })
   }
 
   async function getInitialMedia() {
     const getMediaResult = await getMedia({ micActive, camActive })
 
     if (getMediaResult.error) {
-      mediaError = true
+      errorModalOpen = true
     }
 
     myVideo = getMediaResult.stream
   }
 
-  const getVideo: GetVideo = () => myVideo
-
-  const getVideoInfo: GetVideoInfo = () => ({ micActive, camActive })
-
-  const handleVideoInfo: HandleVideoInfo = ({ info, mateId }) => {
+  function handleVideoInfo(data: VideoInfo, peer: string) {
     matesVideo = matesVideo.map((mateVideo) => {
-      if (mateVideo.mate.id === mateId) {
-        return { ...mateVideo, micActive: info.micActive, camActive: info.camActive }
+      if (mateVideo.mate.id === peer) {
+        return { ...mateVideo, micActive: data.micActive, camActive: data.camActive }
       }
       return mateVideo
     })
   }
 
-  const handleMateLeaved: HandleMateLeaved = (mateId) => {
-    // do we need to close this peer connection?
-    matesVideo = matesVideo.filter((item) => item.mate?.id !== mateId)
+  function createMyPeer(user: TUser | null) {
+    if (!user) {
+      myPeer?.destroy()
+      myPeer = null
+      return
+    }
+    // I'm joining the room, mates are getting my info
+    myPeer = new Peer(user.id)
+    // mates will connect
+    myPeer.on('connection', (conn) => {
+      peerCons.push(conn)
+      conn.on('open', () => conn.send({ micActive, camActive }))
+      conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
+      conn.on('close', () => handleMateLeavedId(conn.peer))
+
+      conn.on('error', (error) => {
+        console.log('conn error')
+        console.log(error)
+      })
+    })
+    // mates will call
+    myPeer.on('call', async (call) => {
+      const myStream = myVideo || undefined
+      call.answer(myStream)
+      const mate = call.metadata.user as TUser
+      call.on('stream', (stream) => {
+        showVideo({ mate, stream })
+      })
+      call.on('close', () => handleMateLeaved(mate))
+      call.on('error', (error) => {
+        console.log('call err')
+        console.log(error)
+      })
+    })
+
+    myPeer.on('error', (error) => {
+      console.log('myPeer error')
+      console.log(error)
+    })
   }
 
-  const handleMatesVideo: HandleMatesVideo = (video) => {
+  async function handleMateJoined(mate: TUser) {
+    // new mate joined the room
+    if (!myPeer || !mate.id) return
+    // I'm setting up peer connection with new mate
+    const conn = myPeer.connect(mate.id)
+    if (!conn) return
+
+    peerCons.push(conn)
+    conn.on('open', () => conn.send({ micActive, camActive }))
+    conn.on('data', (data) => handleVideoInfo(data as VideoInfo, conn.peer))
+    conn.on('close', () => handleMateLeaved(mate))
+    conn.on('error', (error) => {
+      console.log('conn error')
+      console.log(error)
+    })
+
+    // I'm calling new mate with my video stream
+    const myStream = myVideo
+    if (!myStream) return
+    const call = myPeer.call(mate.id, myStream, { metadata: { user: $user } })
+    call.on('stream', (stream) => showVideo({ mate, stream }))
+    
+    call.on('error', (error) => {
+      console.log('call err')
+      console.log(error)
+    })
+
+    myPeer.on('error', (error) => {
+      console.log('myPeer error')
+      console.log(error)
+    })
+  }
+
+  function handleMateLeavedId(mateId: TUser['id']) {
+    // do we need to close this peer connection?
+    if (!mateId) return
+    matesVideo = matesVideo.filter((item) => item.mate?.id !== mateId)
+    peerCons = peerCons.filter((conn) => {
+      if (conn.peer === mateId) {
+        conn.close()
+        return false
+      }
+      return true
+    })
+  }
+
+  function handleMateLeaved(mate: TUser) {
+    return handleMateLeavedId(mate.id)
+  }
+
+  function showVideo(video: MateVideo) {
     matesVideo = [...matesVideo, video]
   }
 
-  function closeMediaModal(evt: Event) {
+  function handleReload(evt: Event) {
     evt.preventDefault()
-    mediaError = false
-  }
-
-  function handleNetworkError() {
-    networkError = true
-    networkModalOpened = true
-  }
-
-  function closeNetworkModal(evt: Event) {
-    evt.preventDefault()
-    networkError = false
-  }
-
-  function createPeer(user: TUser | null) {
-    myPeer = createMyPeer({ 
-      user,
-      getVideoInfo,
-      getVideo,
-      handleVideoInfo,
-      handleMatesVideo,
-      handleMateLeaved,
-      handleNetworkError,
-    })
+    errorModalOpen = false
   }
 
   onMount(async () => {
     await getInitialMedia()
-    userUnsuscribe = user.subscribe(createPeer)
-    socket.on(EEventRoom.userJoined, myPeer?.handleMateJoined)
-    socket.on(EEventRoom.userLeaved, (mate) => handleMateLeaved(mate.id))
+    userUnsuscribe = user.subscribe(createMyPeer)
+    socket.on(EEventRoom.userJoined, handleMateJoined)
+    socket.on(EEventRoom.userLeaved, handleMateLeaved)
   })
 
   onDestroy(() => {
     userUnsuscribe?.()
     myPeer?.destroy()
-    socket.off(EEventRoom.userJoined, myPeer?.handleMateJoined)
-    socket.off(EEventRoom.userLeaved, (mate) => handleMateLeaved(mate.id))
+    socket.off(EEventRoom.userJoined, handleMateJoined)
+    socket.off(EEventRoom.userLeaved, handleMateLeaved)
+
     myVideo?.getTracks().forEach((track) => track.stop())
   })
 </script>
 
-{#if networkError}
-  <div class="error-wrap">
-    <span class="text-danger fw-bolder">Network error</span>
-  </div>  
-{:else}
-  <ul class="grid">
-    {#if myVideo}
-      <li class="grid-item bg-dark rounded">
-        <Video src={myVideo} name={$user?.name} {micActive} {camActive} mine />
-      </li>
-    {/if}
-    {#each matesVideo as mateVideo (mateVideo.mate.id)}
-      <li class="grid-item bg-dark rounded">
-        <Video src={mateVideo.stream} name={mateVideo.mate.name} micActive={mateVideo.micActive} camActive={mateVideo.camActive}/>
-      </li>
-    {/each}
-  </ul>
-{/if}
-<Modal isOpen={mediaError} size="md" centered>
+<ul class="grid">
+  {#if myVideo}
+    <li class="grid-item bg-dark rounded">
+      <Video src={myVideo} name={$user?.name} {micActive} {camActive} mine />
+    </li>
+  {/if}
+  {#each matesVideo as mateVideo (mateVideo.mate.id)}
+    <li class="grid-item bg-dark rounded">
+      <Video src={mateVideo.stream} name={mateVideo.mate.name} micActive={mateVideo.micActive} camActive={mateVideo.camActive}/>
+    </li>
+  {/each}
+</ul>
+<Modal isOpen={errorModalOpen} size="md" centered>
   <ModalBody class="p-4">
     <p class="text-center">
       There is an&nbsp;error with your media. Please, allow this page to&nbsp;use your&nbsp;camera and&nbsp;microphone in&nbsp;the&nbsp;site settings
     </p>
-    <Button on:click={closeMediaModal} color="dark" outline type="submit" class="d-block w-100" size="lg"
-      >Ok</Button>
-  </ModalBody>
-</Modal>
-<Modal isOpen={networkModalOpened} size="md" centered>
-  <ModalBody class="p-4">
-    <p class="text-center">
-      There is an&nbsp;error with your network. Please, try to&nbsp;reload the&nbsp;page
-    </p>
-    <Button on:click={closeNetworkModal} color="dark" outline type="submit" class="d-block w-100" size="lg"
+    <Button on:click={handleReload} color="dark" outline type="submit" class="d-block w-100" size="lg"
       >Ok</Button>
   </ModalBody>
 </Modal>
@@ -198,11 +255,5 @@
     .grid-item {
       flex: 0 0 min(49%, 32vw);
     }
-  }
-
-  .error-wrap {
-    display: grid;
-    place-content: center;
-    height: 100%;
   }
 </style>
