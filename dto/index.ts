@@ -2,9 +2,13 @@ export enum EEventRoom {
   create = 'room:create',
   check = 'room:check',
   join = 'room:join',
+  signal = 'room:signal',
   leave = 'room:leave',
+  getMates = 'room:getMates',
+
   userJoined = 'room:userjoined',
   userLeaved = 'room:userleaved',
+  userSignaled = 'room:userSignaled',
 }
 
 export enum EEventMsg {
@@ -23,6 +27,10 @@ export type TUser = {
   name: string
   roomId: string
 }
+
+export type Mates = Record<TUser['id'], TUser> | null
+
+export type SignalPayload = { data: unknown, fromId: TUser['id'], toId: TUser['id'] }
 
 export type TMessageReq = string
 
@@ -56,7 +64,9 @@ export type TRoom = {
 
 export type TServerToClientEvents = {
   [EEventRoom.userJoined]: (user: TUser) => void
+  [EEventRoom.userSignaled]: (data: SignalPayload) => void
   [EEventRoom.userLeaved]: (user: TUser) => void
+
   [EEventMsg.new]: (msg: TMessageRes) => void
   [EEventMsg.all]: (allMsg: TMessageRes[]) => void
 }
@@ -64,7 +74,12 @@ export type TServerToClientEvents = {
 export type TClientToServerEvents = {
   [EEventRoom.create]: (callback: (roomId: TRoom['id']) => void) => void
   [EEventRoom.check]: (roomId: TRoom['id'], callback: (check: boolean) => void) => void
-  [EEventRoom.join]: ({ roomId, name }: {roomId: TRoom['id'], name: TUser['name']}, callback: (user: TUser | null) => void) => void
+  [EEventRoom.join]: (
+    { roomId, name }: { roomId: TRoom['id'], name: TUser['name'] }, 
+    callback: ({ user }: { user: TUser | null }) => void
+    ) => void
+  [EEventRoom.getMates]: ({ userId, roomId }: { userId: TUser['id'], roomId: TRoom['id'] }, callback: (mates: Mates) => void) => void
+  [EEventRoom.signal]: (data: SignalPayload) => void
   [EEventRoom.leave]: () => void
   [EEventMsg.sent]: (msg: TMessageReq) => void
 }

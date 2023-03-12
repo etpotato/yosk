@@ -49,7 +49,7 @@ io.on('connection', (socket) => {
     console.log('user', socket.id, 'wants to join room', roomId)
 
     if (!rooms.has(roomId)) {
-      ackFn(null)
+      ackFn({ user: null })
       return
     }
 
@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
 
     users.set(user.id, user)
     rooms.addUser({ user, roomId })
-    ackFn(user)
+    ackFn({ user })
 
     const message = createInfoMessage({ user, action: EEventRoom.userJoined })
     rooms.addMessage({ message, roomId })
@@ -74,6 +74,22 @@ io.on('connection', (socket) => {
         io.to(neighbor.id).emit(EEventRoom.userJoined, user)
       }
     })
+  })
+
+  socket.on(EEventRoom.getMates, ({ userId, roomId }, ackFn) => {
+    ackFn(rooms.getMates(userId, roomId))
+  })
+
+  socket.on(EEventRoom.signal, (signalData) => {
+    const reciever = users.get(signalData.toId)
+
+    console.log('signal', signalData.fromId, signalData.toId)
+
+    console.log('signal is sent to', JSON.stringify(reciever, null, 2))
+    console.log('poyload', signalData)
+    if (!reciever) return
+
+    io.to(reciever.id).emit(EEventRoom.userSignaled, signalData)
   })
 
   socket.on(EEventRoom.leave, () => {

@@ -1,4 +1,4 @@
-import { TUser, TRoom, TMessageRes } from '@dto'
+import { TUser, TRoom, TMessageRes, Mates } from '@dto'
 import { nanoid } from 'nanoid'
 
 const TIMEOUT = 10 * 60 * 1000
@@ -105,6 +105,31 @@ class Rooms {
       console.error(err)
 
       return []
+    }
+  }
+
+  getMates(id: TUser['id'], roomId: TRoom['id']) {
+    try {
+      const room = this.rooms.get(roomId)
+
+      if (!room) {
+        throw new Error(`room ${roomId} not found`)
+      }
+
+      const mates: Mates = {}
+      let hasMates = false
+
+      for (const user of room.users.values()) {
+        if (user.id !== id) {
+          mates[user.id] = user
+          hasMates = true
+        }
+      }
+
+      return hasMates ? mates : null
+    } catch (err) {
+      console.error(err)
+      return null
     }
   }
 

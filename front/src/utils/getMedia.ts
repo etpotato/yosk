@@ -32,7 +32,7 @@ export async function getMedia({
 
     return { stream, error: null }
   } catch (error) {
-    console.log('getUserMedia all erroror:', error)
+    console.error('all media failed')
     if (error instanceof Error && error.message.includes(DENIED)) {
       return { stream: null, error }
     }
@@ -51,7 +51,7 @@ export async function getMedia({
 
     return { stream, error: null }
   } catch (err) {
-    console.log('getUserMedia video error:', err)
+    console.error('video failed')
   }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -64,7 +64,7 @@ export async function getMedia({
 
     return { stream, error: null }
   } catch (error) {
-    console.log('getUserMedia audio error:', error)
+    console.error('audio failed')
     return { stream: null, error }
   }
 }

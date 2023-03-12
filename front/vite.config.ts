@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@dto': path.resolve(__dirname, '../dto'),
+      'simple-peer': 'simple-peer/simplepeer.min.js',
     },
   },
 })

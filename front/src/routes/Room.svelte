@@ -41,7 +41,7 @@
 
   function joinRoom(evt: Event) {
     evt.preventDefault()
-    socket.emit(EEventRoom.join, { roomId, name }, (userInfo) => {
+    socket.emit(EEventRoom.join, { roomId, name }, ({ user: userInfo }) => {
       user.set(userInfo)
       roomExist = Boolean(userInfo)
     })
@@ -144,7 +144,7 @@
   {#if !modalOpen}
     <div class="room">
       <div class="room-video">
-        <VideoChat {micActive} {camActive}/>
+        <VideoChat {micActive} {camActive} {roomId}/>
         <div class="room-controls">
           <div class="room-control-wrap room-control-left">
             <EndCall on:click={() => navigate('/')} />
