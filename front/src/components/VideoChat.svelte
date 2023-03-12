@@ -20,8 +20,8 @@
     stream: MediaStream;
   } & VideoInfo
 
-  export let micActive = true
-  export let camActive = true
+  export let micActive: boolean
+  export let camActive: boolean
   export let roomId: TRoom['id']
 
   let peerMates: { peer: Instance, mate: TUser, active: boolean }[] | null = null 
