@@ -24,7 +24,7 @@
   export let camActive: boolean
   export let roomId: TRoom['id']
 
-  let peerMates: { peer: Instance, mate: TUser, active: boolean }[] | null = null 
+  let peerMates: { peer: Instance, mate: TUser, active: boolean }[] = [] 
   let errorModalOpen = false
   let myVideo: MediaStream | null = null
   let matesVideo: MateVideo[] = []
@@ -37,7 +37,7 @@
     myVideo?.getVideoTracks().forEach((track) => {
       track.enabled = camActive
     })
-    peerMates?.forEach((peerMate) => {
+    peerMates.forEach((peerMate) => {
       if (peerMate.active) {
         peerMate.peer.send(JSON.stringify({ micActive, camActive }))
       }
@@ -45,13 +45,9 @@
   }
 
   async function getInitialMedia() {
-    const getMediaResult = await getMedia({ micActive, camActive })
-
-    if (getMediaResult.error) {
-      errorModalOpen = true
-    }
-
-    myVideo = getMediaResult.stream
+    const { error, stream } = await getMedia({ micActive, camActive })
+    errorModalOpen = Boolean(error)
+    myVideo = stream
   }
 
   function handleVideoInfo({ info, mateId }: { info: VideoInfo, mateId: string }) {
@@ -80,7 +76,7 @@
           })
   
           peer.on('connect', () => {
-            peerMates?.forEach((peerMate) => {
+            peerMates.forEach((peerMate) => {
               if (peerMate.mate.id === mate.id) {
                 peerMate.active = true
               }
@@ -115,7 +111,7 @@
     })
 
     peer.on('connect', () => {
-      peerMates?.forEach((peerMate) => {
+      peerMates.forEach((peerMate) => {
         if (peerMate.mate.id === mate.id) {
           peerMate.active = true
         }
@@ -136,14 +132,11 @@
 
     peer.on('error', (err) => console.error(err))
 
-    peerMates = [...(peerMates || []), { mate, peer: peer, active: false }]
+    peerMates = [...peerMates, { mate, peer: peer, active: false }]
   }
 
   function handleMateLeaved(mate: TUser) {
     matesVideo = matesVideo.filter((item) => item.mate?.id !== mate.id)
-
-    if (!peerMates) return
-
     peerMates = peerMates.filter((peerMate) => {
       if (peerMate.mate.id === mate.id) {
         peerMate.peer.destroy()
@@ -154,7 +147,6 @@
   }
 
   function handleMateSignaled({ data, fromId }: SignalPayload) {
-    if (!peerMates?.length) return
     const { peer } = peerMates.find((peerMate) => peerMate.mate.id === fromId) || {}
     peer?.signal(data as SignalData)
   }
@@ -163,7 +155,7 @@
     matesVideo = [...matesVideo, video]
   }
 
-  function handleReload(evt: Event) {
+  function handleModalClose(evt: Event) {
     evt.preventDefault()
     errorModalOpen = false
   }
@@ -200,7 +192,7 @@
     <p class="text-center">
       There is an&nbsp;error with your media. Please, allow this page to&nbsp;use your&nbsp;camera and&nbsp;microphone in&nbsp;the&nbsp;site settings
     </p>
-    <Button on:click={handleReload} color="dark" outline type="submit" class="d-block w-100" size="lg"
+    <Button on:click={handleModalClose} color="dark" outline type="submit" class="d-block w-100" size="lg"
       >Ok</Button>
   </ModalBody>
 </Modal>
