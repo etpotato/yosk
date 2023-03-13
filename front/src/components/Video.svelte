@@ -17,11 +17,14 @@
     } catch {}
   }
 
-  onMount(() => {
-    if (src) {
+  $: {
+    if (src && videoEl) {
       videoEl.srcObject = src
-      document.addEventListener('click', playVideo, { once: true })
     }
+  }
+
+  onMount(() => {
+    document.addEventListener('click', playVideo, { once: true })
   })
 </script>
 
