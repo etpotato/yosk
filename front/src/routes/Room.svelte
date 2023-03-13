@@ -7,6 +7,7 @@
   import type { TRoom } from '@dto'
   import socket from '../lib/ws'
   import { user } from '../store/user'
+  import { mediaInfo, toggleCam, toggleMic } from '../store/mediaInfo'
   import Chat from '../components/Chat.svelte'
   import VideoChat from '../components/VideoChat.svelte'
   import Share from '../components/Share.svelte'
@@ -29,8 +30,6 @@
   let toasts: ToastData[] = []
   let toastId = 0
   let toastTimeouts: ReturnType<typeof setTimeout>[] = []
-  let micActive = true
-  let camActive = true
 
   function checkRoom(id: TRoom['id']) {
     socket.emit(EEventRoom.check, id, (ack) => {
@@ -86,13 +85,13 @@
   function handleMic(evt: Event) {
     evt.preventDefault()
     ;(evt.currentTarget as HTMLButtonElement)?.blur()
-    micActive = !micActive
+    toggleMic()
   }
 
   function handleCam(evt: Event) {
     evt.preventDefault()
     ;(evt.currentTarget as HTMLButtonElement)?.blur()
-    camActive = !camActive
+    toggleCam()
   }
 
   onMount(() => {
@@ -144,15 +143,15 @@
   {#if !modalOpen}
     <div class="room">
       <div class="room-video">
-        <VideoChat {micActive} {camActive} {roomId}/>
+        <VideoChat {roomId}/>
         <div class="room-controls">
           <div class="room-control-wrap room-control-left">
             <EndCall on:click={() => navigate('/')} />
             <Share on:click={handleShare} />
           </div>
           <div class="room-control-wrap">
-            <VideoControl type="mic" active={micActive} on:click={handleMic} />
-            <VideoControl type="cam" active={camActive} on:click={handleCam} />
+            <VideoControl type="mic" active={$mediaInfo.micActive} on:click={handleMic} />
+            <VideoControl type="cam" active={$mediaInfo.camActive} on:click={handleCam} />
           </div>
           <div class="room-control-wrap room-control-right">
             <ChatBtn {chatOpen} on:click={handleChatToggle}/>

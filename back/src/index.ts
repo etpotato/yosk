@@ -83,13 +83,13 @@ io.on('connection', (socket) => {
   socket.on(EEventRoom.signal, (signalData) => {
     const reciever = users.get(signalData.toId)
 
-    console.log('signal', signalData.fromId, signalData.toId)
+    console.log(`signal from ${signalData.fromId} to ${signalData.toId}`)
 
-    console.log('signal is sent to', JSON.stringify(reciever, null, 2))
-    console.log('poyload', signalData)
     if (!reciever) return
 
     io.to(reciever.id).emit(EEventRoom.userSignaled, signalData)
+
+    console.log(`signal is sent to ${signalData.toId}`)
   })
 
   socket.on(EEventRoom.leave, () => {
