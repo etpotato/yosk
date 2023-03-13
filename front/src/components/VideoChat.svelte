@@ -49,7 +49,7 @@
   }
 
   function createPeerInitiator({ user, mate }: { user: TUser, mate: TUser}) {
-    const peer = new Peer({ initiator: true, objectMode: true })
+    const peer = new Peer({ initiator: true, trickle: false, objectMode: true })
 
     peer.on('signal', (data) => {
       socket.emit(EEventRoom.signal, { data, fromId: user.id, toId: mate.id })
@@ -87,7 +87,7 @@
   }
 
   function handleMateJoined(mate: TUser) {
-    const peer = new Peer({ objectMode: true })
+    const peer = new Peer({ trickle: false, objectMode: true })
 
     peer.on('signal', (data) => {
       if (!$user) return
